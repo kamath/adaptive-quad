@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Final Presentation</title>
+    <link href="styles/index.css" rel="stylesheet">
+
+    <!-- Materialize CSS/JS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+</head>
+
+<body>
+    <div id="motivation" style="display: none;">
+        <div class="container">
+            <h1>Motivation</h1>
+            <p>As a Math major, I'm really into the YouTube channel <a href="https://www.youtube.com/channel/UCYO_jab_esuFRV4b17AJtAw">3Blue1Brown</a>, where Grant Sanderson makes amazing visualizations of higher order math.</p>
+            <!-- <br> -->
+            <p>I've been trying to do something similar, and Professor Borkin said doing something like that would be a great idea for this assignment. </p>
+            <p>That being said, this is a little nontraditional in that the "data" being visualized isn't from a dataset. Rather, it's just a set of slides that animate the proof of the Pythagorean theorem.</p>
+            <p>I think math can become really unintuitive when you just see a bunch of letters and equations, but visualizing it is not only super fun to watch, but also highlights the beauty of "the language of the universe"</p>
+            <p>The figures here are the different slides, and the interactions are that you can click anywhere on the canvas to go from slide to slide. The dynamic features are the animations on each slide.</p>
+            <p>I don't have that many sources to cite. The proof is rather trivial and the animations were from scratch using <a href="https://www.w3schools.com/graphics/svg_polygon.asp">SVG Polygons</a> and path animations on SVGs generated from <a href="https://www.mathjax.org/">MathJax</a></p>
+            <a class="waves-effect waves-light btn" onclick="loadSlides()" style="background-color: #1C2826;">Begin</a>
+            <p>My code is available at <a href="https://github.ccs.neu.edu/akamath/ds4200-final-pres">akamath/ds4200-final-pres</a> on the Khoury Github</p>
+        </div>
+    </div>
+    <div id="vizcontainer">
+        <div class="vcenter" id="viz">
+        </div>
+    </div>
+
+
+    <script src="https://d3js.org/d3.v6.min.js"></script>
+    <script src="https://unpkg.com/d3-interpolate-path/build/d3-interpolate-path.min.js"></script>
+    <script src="scripts/slides.js"></script>
+    <!-- MathJax Configuration -->
+    <script src="scripts/tex2svg.js" async></script>
+    <!-- Animations -->
+    <script src="scripts/viz.js"></script>
+</body>
+
+</html>

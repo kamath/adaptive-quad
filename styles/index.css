@@ -1,0 +1,101 @@
+html,
+body {
+    height: 100%;
+    width: 100%;
+    margin: 0
+}
+
+#vizcontainer {
+    height: 100%;
+    width: 100%;
+}
+
+.vcenter {
+    position: relative;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+polygon {
+    stroke-width: 0;
+}
+
+* {
+    shape-rendering: crispEdges
+}
+
+.animate {
+    stroke-dasharray: 1000;
+    stroke-dashoffset: 1000;
+    /* animation: dash 1s linear forwards; */
+    animation: dash ease 1;
+    -webkit-animation: dash ease 1;
+    animation-fill-mode: forwards;
+    -webkit-animation-fill-mode: forwards;
+    animation-duration: 1s;
+    -webkit-animation-duration: 1s;
+    stroke-width: 15px;
+}
+
+.animatePoly {
+    stroke-dasharray: 5000;
+    stroke-dashoffset: 5000;
+    /* animation: dash 1s linear forwards; */
+    animation: dashPoly ease 1;
+    animation-fill-mode: forwards;
+    animation-duration: 3s;
+}
+
+@keyframes dash {
+    from {
+        /* stroke-width: 15px; */
+        fill: transparent;
+    }
+    25% {
+        fill: transparent;
+    }
+    99% {
+        stroke-dashoffset: 0;
+        /* stroke-width: 15px; */
+    }
+    100% {
+        stroke-width: 0;
+    }
+}
+
+@keyframes dashPoly {
+    100% {
+        stroke-dashoffset: 0;
+        /* stroke-width: 15px; */
+    }
+}
+
+@-webkit-keyframes dash {
+    from {
+        /* stroke-width: 15px; */
+        fill: transparent;
+    }
+    25% {
+        fill: transparent;
+    }
+    99% {
+        stroke-dashoffset: 2000;
+        /* stroke-width: 15px; */
+    }
+    100% {
+        stroke-width: 0;
+    }
+}
+
+li *:empty {
+    display: none;
+}
+
+.mjx-chtml.MJXc-display {
+    margin: 0 !important;
+}
+
+mjx-container {
+    display: absolute !important;
+    top: -40px ! important;
+}

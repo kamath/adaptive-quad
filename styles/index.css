@@ -35,6 +35,8 @@ polygon {
     animation-duration: 1s;
     -webkit-animation-duration: 1s;
     stroke-width: 15px;
+    fill: white;
+    stroke: white;
 }
 
 .animatePoly {

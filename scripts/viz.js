@@ -1,8 +1,63 @@
+const toPathData = function(commands, decimalPlaces) {
+    let bbox = { x: 0, y: 0, height: 0, width: 0 };
+    decimalPlaces = decimalPlaces !== undefined ? decimalPlaces : 2;
+
+    function floatToString(v) {
+        if (Math.round(v) === v) {
+            return '' + Math.round(v);
+        } else {
+            return v.toFixed(decimalPlaces);
+        }
+    }
+
+    function packValues() {
+        let s = '';
+        for (let i = 0; i < arguments.length; i += 1) {
+            const v = arguments[i];
+            if (v >= 0 && i > 0) {
+                s += ' ';
+            }
+
+            s += floatToString(v);
+        }
+
+        return s;
+    }
+
+    let d = '';
+    for (let i = 0; i < commands.length; i += 1) {
+        const cmd = commands[i];
+        if ("x" in cmd && cmd.x < bbox.x) bbox.x = cmd.x
+        if ("y" in cmd && cmd.y < bbox.y) bbox.y = cmd.y
+        if ("x1" in cmd && cmd.x1 < bbox.x) bbox.x = cmd.x1
+        if ("y1" in cmd && cmd.y1 < bbox.x) bbox.y = cmd.y1
+
+        if ("x" in cmd && cmd.x > bbox.x + bbox.width) bbox.width = cmd.x - bbox.x
+        if ("y" in cmd && cmd.y > bbox.y + bbox.height) bbox.height = cmd.y - bbox.y
+        if ("x1" in cmd && cmd.x1 > bbox.x1 + bbox.width) bbox.width = cmd.x1 - bbox.x
+        if ("y1" in cmd && cmd.y1 > bbox.y1 + bbox.height) bbox.height = cmd.y1 - bbox.y
+
+        if (cmd.type === 'M') {
+            d += 'M' + packValues(cmd.x, cmd.y);
+        } else if (cmd.type === 'L') {
+            d += 'L' + packValues(cmd.x, cmd.y);
+        } else if (cmd.type === 'C') {
+            d += 'C' + packValues(cmd.x1, cmd.y1, cmd.x2, cmd.y2, cmd.x, cmd.y);
+        } else if (cmd.type === 'Q') {
+            d += 'Q' + packValues(cmd.x1, cmd.y1, cmd.x, cmd.y);
+        } else if (cmd.type === 'Z') {
+            d += 'Z';
+        }
+    }
+
+    return [d, bbox];
+};
+
+
 const domID = "#viz"
 
 const baseHeight = window.innerHeight;
 const baseWidth = window.innerWidth;
-console.log("BASE HEIGHT", baseHeight)
 const heightToWidth = 1920 / 1080;
 const widthToHeight = 1080 / 1920;
 
@@ -23,11 +78,10 @@ var margin = { top: 0, right: 0, bottom: 0, left: 0 },
 vizHeight = baseHeight - margin.top - margin.bottom - textHeight;
 
 const loadMotivation = () => {
-    console.log("Loading Motivation")
     document.getElementById("motivation").style.display = "block"
 }
 
-const loadSlides = () => {
+const loadSlides = (font) => {
     document.getElementById("motivation").style.display = "none"
         // append the svg object to the body of the page
     let svg = d3.select(domID)
@@ -47,9 +101,6 @@ const loadSlides = () => {
 
     const plot = (x0, y0, w, h, a, b, f, n, yFin, closePath = false) => {
         const dx = (b - a) / n;
-        console.log("DX", dx)
-        // const yFin = Math.max(...Array(n).fill(1).map((_, i) => Math.abs(f(a + dx * i))));
-        console.log("YFIN", yFin)
         const yStretch = h / yFin;
         const pixelStep = w / n;
         return `M ${x0} ${y0}` + Array(n + 1).fill(1).map((_, i) => {
@@ -61,9 +112,6 @@ const loadSlides = () => {
     const MRAM = (x0, y0, w, h, a, b, f, n, yFin) => {
         const dx = (b - a) / n;
         const pixelStep = w / n;
-        console.log("N", n)
-        // const yFin = Math.max(...Array(n).fill(1).map((_, i) => Math.abs(f(a + dx * i))))
-        console.log("YFIN PATH", yFin)
         const yStretch = h / yFin;
         return `M${x0},${y0}` + Array(n).fill(1).map((_, i) => {
             const x = a + dx * i;
@@ -76,9 +124,6 @@ const loadSlides = () => {
     const MRAMErrorAbove = (x0, y0, w, h, a, b, f, n, yFin) => {
         const dx = (b - a) / n;
         const pixelStep = w / n;
-        console.log("N", n)
-        // const yFin = Math.max(...Array(n).fill(1).map((_, i) => Math.abs(f(a + dx * i))))
-        console.log("YFIN PATH", yFin)
         const yStretch = h / yFin;
         const xStretch = w / (b - a);
         return `M${x0},${y0}` + Array(n).fill(1).map((_, i) => {
@@ -89,9 +134,9 @@ const loadSlides = () => {
             const y1 = f(x1);
             const y2 = f(x2);
             const yc = f(xc);
-            const xBez = 2*xc - x1/2 - x2/2;
-            const yBez = 2*yc - y1/2 - y2/2;
-            return Math.abs(f(x + dx/2)) - Math.abs(f(x)) < 0 ? '' : `M${x0 + xStretch * x1} ${y0 - yStretch * y1} Q ${x0 + xStretch * xBez},${y0 - yStretch * yBez} ${x0 + xStretch * x2},${y0 - yStretch * y2} L ${x0 + xStretch * x1} ${y0 - yStretch * y2}`
+            const xBez = 2 * xc - x1 / 2 - x2 / 2;
+            const yBez = 2 * yc - y1 / 2 - y2 / 2;
+            return Math.abs(f(x + dx / 2)) - Math.abs(f(x)) < 0 ? '' : `M${x0 + xStretch * x1} ${y0 - yStretch * y1} Q ${x0 + xStretch * xBez},${y0 - yStretch * yBez} ${x0 + xStretch * x2},${y0 - yStretch * y2} L ${x0 + xStretch * x1} ${y0 - yStretch * y2}`
         }).join("") + Array(n).fill(1).map((_, i) => {
             const x = a + dx * i;
             const x1 = a + dx * i + dx / 2;
@@ -100,9 +145,9 @@ const loadSlides = () => {
             const y1 = f(x1);
             const y2 = f(x2);
             const yc = f(xc);
-            const xBez = 2*xc - x1/2 - x2/2;
-            const yBez = 2*yc - y1/2 - y2/2;
-            return Math.abs(f(x)) - Math.abs(f(x + dx/2)) < 0 ? '' : `M${x0 + xStretch * x1} ${y0 - yStretch * y1} Q ${x0 + xStretch * xBez},${y0 - yStretch * yBez} ${x0 + xStretch * x2},${y0 - yStretch * y2} L ${x0 + xStretch * x2} ${y0 - yStretch * y1}`
+            const xBez = 2 * xc - x1 / 2 - x2 / 2;
+            const yBez = 2 * yc - y1 / 2 - y2 / 2;
+            return Math.abs(f(x)) - Math.abs(f(x + dx / 2)) < 0 ? '' : `M${x0 + xStretch * x1} ${y0 - yStretch * y1} Q ${x0 + xStretch * xBez},${y0 - yStretch * yBez} ${x0 + xStretch * x2},${y0 - yStretch * y2} L ${x0 + xStretch * x2} ${y0 - yStretch * y1}`
         }).join("")
     }
 
@@ -119,9 +164,9 @@ const loadSlides = () => {
             const y1 = f(x1);
             const y2 = f(x2);
             const yc = f(xc);
-            const xBez = 2*xc - x1/2 - x2/2;
-            const yBez = 2*yc - y1/2 - y2/2;
-            return Math.abs(f(x + dx/2)) - Math.abs(f(x)) > 0 ? '' : `M${x0 + xStretch * x1} ${y0 - yStretch * y1} Q ${x0 + xStretch * xBez},${y0 - yStretch * yBez} ${x0 + xStretch * x2},${y0 - yStretch * y2} L ${x0 + xStretch * x1} ${y0 - yStretch * y2}`
+            const xBez = 2 * xc - x1 / 2 - x2 / 2;
+            const yBez = 2 * yc - y1 / 2 - y2 / 2;
+            return Math.abs(f(x + dx / 2)) - Math.abs(f(x)) > 0 ? '' : `M${x0 + xStretch * x1} ${y0 - yStretch * y1} Q ${x0 + xStretch * xBez},${y0 - yStretch * yBez} ${x0 + xStretch * x2},${y0 - yStretch * y2} L ${x0 + xStretch * x1} ${y0 - yStretch * y2}`
         }).join("") + Array(n).fill(1).map((_, i) => {
             const x = a + dx * i;
             const x1 = a + dx * i + dx / 2;
@@ -130,9 +175,9 @@ const loadSlides = () => {
             const y1 = f(x1);
             const y2 = f(x2);
             const yc = f(xc);
-            const xBez = 2*xc - x1/2 - x2/2;
-            const yBez = 2*yc - y1/2 - y2/2;
-            return Math.abs(f(x)) - Math.abs(f(x + dx/2)) > 0 ? '' : `M${x0 + xStretch * x1} ${y0 - yStretch * y1} Q ${x0 + xStretch * xBez},${y0 - yStretch * yBez} ${x0 + xStretch * x2},${y0 - yStretch * y2} L ${x0 + xStretch * x2} ${y0 - yStretch * y1}`
+            const xBez = 2 * xc - x1 / 2 - x2 / 2;
+            const yBez = 2 * yc - y1 / 2 - y2 / 2;
+            return Math.abs(f(x)) - Math.abs(f(x + dx / 2)) > 0 ? '' : `M${x0 + xStretch * x1} ${y0 - yStretch * y1} Q ${x0 + xStretch * xBez},${y0 - yStretch * yBez} ${x0 + xStretch * x2},${y0 - yStretch * y2} L ${x0 + xStretch * x2} ${y0 - yStretch * y1}`
         }).join("")
     }
 
@@ -142,8 +187,6 @@ const loadSlides = () => {
         const yStretch = h / yFin;
         return `M${x0},${y0}` + Array(n).fill(1).map((_, i) => {
             const x = a + dx * i;
-            // const y = 
-            // console.log("X", x, y0 - yStretch * f(x))
             return `M${x0 + pixelStep * i} ${y0} L ${x0 + pixelStep * i} ${y0} L ${x0 + pixelStep * i} ${y0 - yStretch * f(x)} L ${x0 + pixelStep * (i + 1)} ${y0 - yStretch * f(x + dx)} L ${x0 + pixelStep * (i + 1)} ${y0}`
         }).join("")
     }
@@ -159,8 +202,8 @@ const loadSlides = () => {
             const y1 = f(x1);
             const y2 = f(x2);
             const yc = f(xc);
-            const xBez = 2*xc - x1/2 - x2/2;
-            const yBez = 2*yc - y1/2 - y2/2;
+            const xBez = 2 * xc - x1 / 2 - x2 / 2;
+            const yBez = 2 * yc - y1 / 2 - y2 / 2;
             return `M ${x0 + xStretch * x1} ${y0} L${x0 + xStretch * x1} ${y0 - yStretch * y1} Q ${x0 + xStretch * xBez},${y0 - yStretch * yBez} ${x0 + xStretch * x2},${y0 - yStretch * y2} L ${x0 + xStretch * x2} ${y0}`;
         }).join("")
     }
@@ -189,7 +232,7 @@ const loadSlides = () => {
     let xAxisBottom = {
         ...xAxisFig,
         points: xAxis(width / 2, vizHeight / 2 + figHeight / 2, figWidth, 3),
-        cy: vizHeight / 2 + figHeight / 2 
+        cy: vizHeight / 2 + figHeight / 2
     }
 
     const lineYEqualsX = {
@@ -241,27 +284,28 @@ const loadSlides = () => {
     }][0]
 
     const mramErr = (halfX, a, b, n, f, yFin) => [{
-        svgType: "path",
-        points: MRAMErrorAbove(width / 2 - figWidth / 2, vizHeight / 2 + (halfX ? 0 : figHeight / 2), figWidth, figHeight, a, b, f, n, yFin * (halfX ? 2 : 1)),
-        fill: "0,255,0",
-        stroke: "0,255,0",
-        strokeWidth: 3,
-        alpha: .5,
-        strokeAlpha: 0,
-        cx: width / 2 - figWidth / 2,
-        cy: vizHeight / 2
-    },
-    {
-        svgType: "path",
-        points: MRAMErrorBelow(width / 2 - figWidth / 2, vizHeight / 2 + (halfX ? 0 : figHeight / 2), figWidth, figHeight, a, b, f, n, yFin * (halfX ? 2 : 1)),
-        fill: "255,0,0",
-        stroke: "255,0,0",
-        strokeWidth: 3,
-        alpha: .5,
-        strokeAlpha: 0,
-        cx: width / 2 - figWidth / 2,
-        cy: vizHeight / 2
-    }];
+            svgType: "path",
+            points: MRAMErrorAbove(width / 2 - figWidth / 2, vizHeight / 2 + (halfX ? 0 : figHeight / 2), figWidth, figHeight, a, b, f, n, yFin * (halfX ? 2 : 1)),
+            fill: "0,255,0",
+            stroke: "0,255,0",
+            strokeWidth: 3,
+            alpha: .5,
+            strokeAlpha: 0,
+            cx: width / 2 - figWidth / 2,
+            cy: vizHeight / 2
+        },
+        {
+            svgType: "path",
+            points: MRAMErrorBelow(width / 2 - figWidth / 2, vizHeight / 2 + (halfX ? 0 : figHeight / 2), figWidth, figHeight, a, b, f, n, yFin * (halfX ? 2 : 1)),
+            fill: "255,0,0",
+            stroke: "255,0,0",
+            strokeWidth: 3,
+            alpha: .5,
+            strokeAlpha: 0,
+            cx: width / 2 - figWidth / 2,
+            cy: vizHeight / 2
+        }
+    ];
 
     const trapezoidSVG = (halfX, a, b, n, f, yFin) => [{
         svgType: "path",
@@ -289,36 +333,37 @@ const loadSlides = () => {
 
     // Shapes to render
     let slides = [
+        [],
         [
             xAxisBottom,
-            {...yAxisFig, cy: vizHeight / 2 + figHeight / 2},
+            {...yAxisFig, cy: vizHeight / 2 + figHeight / 2 },
             lineYEqualsX,
         ],
         [
             xAxisBottom,
             yAxisFig,
             lineYEqualsX,
-            mramSVG(false, 0, 6.28, 1, x=>x, 6.28),
+            mramSVG(false, 0, 6.28, 1, x => x, 6.28),
         ],
         [
             xAxisBottom,
             yAxisFig,
             lineYEqualsX,
-            mramSVG(false, 0, 6.28, 1, x=>x, 6.28),
-            ...mramErr(false, 0, 6.28, 1, x=>x, 6.28)
+            mramSVG(false, 0, 6.28, 1, x => x, 6.28),
+            ...mramErr(false, 0, 6.28, 1, x => x, 6.28)
         ],
         [
             xAxisBottom,
             yAxisFig,
             lineYEqualsX,
-            mramSVG(false, 0, 6.28, 8, x=>x, 6.28),
+            mramSVG(false, 0, 6.28, 8, x => x, 6.28),
         ],
         [
             xAxisBottom,
             yAxisFig,
             lineYEqualsX,
-            mramSVG(false, 0, 6.28, 8, x=>x, 6.28),
-            ...mramErr(false, 0, 6.28, 8, x=>x, 6.28)
+            mramSVG(false, 0, 6.28, 8, x => x, 6.28),
+            ...mramErr(false, 0, 6.28, 8, x => x, 6.28)
         ],
         [
             xAxisFig,
@@ -351,14 +396,14 @@ const loadSlides = () => {
             sinCurve,
             // trapezoidSVG(false, 0, 10, 3, x => Math.pow(x - 5, 2), 25),
             trapezoidSVG(true, 0, 6.28, 8, Math.sin, 1),
-            ...mramErr(true, 0, 6.28, 8, Math.sin, 1).map(d => {return {...d, alpha: 0, strokeAlpha: 0}}),
+            ...mramErr(true, 0, 6.28, 8, Math.sin, 1).map(d => { return {...d, alpha: 0, strokeAlpha: 0 } }),
         ],
         [
             xAxisFig,
             yAxisFig,
             sinCurve,
             simpsonSVG(true, 0, 6.28, 8, Math.sin, 1),
-            ...mramErr(true, 0, 6.28, 8, Math.sin, 1).map(d => {return {...d, alpha: 0, strokeAlpha: 0}}),
+            ...mramErr(true, 0, 6.28, 8, Math.sin, 1).map(d => { return {...d, alpha: 0, strokeAlpha: 0 } }),
             {},
             yAxisFig
         ],
@@ -376,20 +421,70 @@ const loadSlides = () => {
     // Texts to render
     const textSpacer = 20
     let texts = [
-
+        [
+            ["plaintext", "Click", width / 2, height / 2 - 36, 72],
+            ["plaintext", "Keep clicking to continue", width / 2, height / 2 + 36, 50],
+        ],
+        [
+            ["plaintext", "OWA OWA", width / 2, height / 2 - 36, 72],
+        ]
     ];
 
     // Render the text and animate if necessary
-    const renderText = (text, x, y, size = 20, animate = true) => {
+    const renderText = (i, ind, textType, text, x, y, size = 72, animate = true) => {
         console.log("GOT TEXT", text)
+        if (textType === "plaintext") {
+            if (i > 0 && ind < texts[i - 1].length) {
+                const prevPath = font.getPath(texts[i - 1][ind][1], 0, size, size).commands;
+                const [d, bbox] = toPathData(prevPath, 5)
+                const g = canvas.append("g");
+                const path = g.append("path");
+                g.attr("transform", `translate(${x - bbox.width / 2} ${y - bbox.height})`)
+
+                path.attr("d", d.replaceAll("Z", "") + "Z")
+                    .attr("class", animate ? "animate" : "")
+                    .attr("id", `path_${i}_${ind}`);
+
+                const curPath = font.getPath(text, 0, size, size).commands;
+                [dNext, bboxNext] = toPathData(curPath, 0, size, size);
+                let origPath = Snap.select(`#path_${i}_${ind}`);
+
+                var fix = function() {
+                    // origPath.animate({ d: d.replaceAll("Z", "") }, 1000, toFancy);
+                    origPath.animate({ d: dNext }, 1000, mina.backout, toSimple);
+                }
+
+                var toSimple = function() {
+                    // origPath.animate({ d: d.replaceAll("Z", "") }, 1000, toFancy);
+                    origPath.animate({ d: dNext.replaceAll("Z", "") }, 1000, mina.backout, fix);
+                }
+
+                console.log("ORIGPATH", origPath)
+
+                toSimple()
+            } else {
+                const textPath = font.getPath(text, 0, size, size).commands;
+                const [d, bbox] = toPathData(textPath, 5)
+                const g = canvas.append("g");
+                const path = g.append("path");
+                g.attr("transform", `translate(${x - bbox.width / 2} ${y - bbox.height})`)
+
+                path.attr("d", d.replaceAll("Z", ""))
+                    .attr("class", animate ? "animate" : "")
+                    .attr("id", `path_${i}_${ind}`)
+            }
+            return
+        }
         var el = MathJax.tex2svg(String.raw `${text}`)
         el = el.querySelector("svg");
-        el.setAttribute("height", size);
-        el.setAttribute("width", size)
+        // el.setAttribute("width", "1ex");
+        // el.style.verticalAlign = "middle";
+        // el.removeAttribute("width")
+        // el.setAttribute("width", size)
         console.log(MathJax.svgStylesheet())
         const displayText = () => canvas
             .append('g')
-            .attr('transform', `translate(${x - size / 2} ${y - size / 2})`)
+            .attr('transform', `translate(${x} ${y})`)
             .append(() => el)
             .selectAll("path")
             .attr("class", animate ? "animate" : "")
@@ -431,7 +526,7 @@ const loadSlides = () => {
                 }
             }
         });
-        // texts[i].forEach((a, ind) => renderText(a[0], a[1], a[2], a[3], a[4]))
+        texts[i].forEach((a, ind) => renderText(i, ind, ...a))
     }
 
     // Next slide on click, go back to beginning if at the end
@@ -444,4 +539,4 @@ const loadSlides = () => {
     })
 
     renderSlides(i, -1)
-}   
+}

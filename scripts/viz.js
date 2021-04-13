@@ -80,16 +80,29 @@ const loadSlides = () => {
         // const yFin = Math.max(...Array(n).fill(1).map((_, i) => Math.abs(f(a + dx * i))))
         console.log("YFIN PATH", yFin)
         const yStretch = h / yFin;
+        const xStretch = w / (b - a);
         return `M${x0},${y0}` + Array(n).fill(1).map((_, i) => {
             const x = a + dx * i;
-            // const y = 
-            // console.log("X", x, y0 - yStretch * f(x))
-            return Math.abs(f(x + dx/2)) - Math.abs(f(x)) < 0 ? '' : `M${x0 + pixelStep * i} ${y0 - yStretch * f(x)} L${x0 + pixelStep * i} ${y0 - yStretch * f(x + dx/2)} L${x0 + pixelStep * i + pixelStep / 2} ${y0 - yStretch * f(x + dx/2)}`
+            const x1 = a + dx * i;
+            const x2 = a + dx * i + dx / 2;
+            const xc = a + dx * i + dx / 4;
+            const y1 = f(x1);
+            const y2 = f(x2);
+            const yc = f(xc);
+            const xBez = 2*xc - x1/2 - x2/2;
+            const yBez = 2*yc - y1/2 - y2/2;
+            return Math.abs(f(x + dx/2)) - Math.abs(f(x)) < 0 ? '' : `M${x0 + xStretch * x1} ${y0 - yStretch * y1} Q ${x0 + xStretch * xBez},${y0 - yStretch * yBez} ${x0 + xStretch * x2},${y0 - yStretch * y2} L ${x0 + xStretch * x1} ${y0 - yStretch * y2}`
         }).join("") + Array(n).fill(1).map((_, i) => {
             const x = a + dx * i;
-            // const y = 
-            // console.log("X", x, y0 - yStretch * f(x))
-            return Math.abs(f(x)) - Math.abs(f(x + dx/2)) < 0 ? '' : `M${x0 + pixelStep / 2 + pixelStep * i} ${y0 - yStretch * f(x + dx / 2)} L${x0 + pixelStep * (i + 1)} ${y0 - yStretch * f(x + dx / 2)} L${x0 + pixelStep * (i + 1)} ${y0 - yStretch * f(x + dx)}`
+            const x1 = a + dx * i + dx / 2;
+            const x2 = a + dx * i + dx;
+            const xc = a + dx * i + dx / 2 + dx / 4;
+            const y1 = f(x1);
+            const y2 = f(x2);
+            const yc = f(xc);
+            const xBez = 2*xc - x1/2 - x2/2;
+            const yBez = 2*yc - y1/2 - y2/2;
+            return Math.abs(f(x)) - Math.abs(f(x + dx/2)) < 0 ? '' : `M${x0 + xStretch * x1} ${y0 - yStretch * y1} Q ${x0 + xStretch * xBez},${y0 - yStretch * yBez} ${x0 + xStretch * x2},${y0 - yStretch * y2} L ${x0 + xStretch * x2} ${y0 - yStretch * y1}`
         }).join("")
     }
 
@@ -97,12 +110,29 @@ const loadSlides = () => {
         const dx = (b - a) / n;
         const pixelStep = w / n;
         const yStretch = h / yFin;
+        const xStretch = w / (b - a);
         return `M${x0},${y0}` + Array(n).fill(1).map((_, i) => {
             const x = a + dx * i;
-            return Math.abs(f(x + dx/2)) - Math.abs(f(x)) > 0 ? '' : `M${x0 + pixelStep * i} ${y0 - yStretch * f(x)} L${x0 + pixelStep * i} ${y0 - yStretch * f(x + dx/2)} L${x0 + pixelStep * i + pixelStep / 2} ${y0 - yStretch * f(x + dx/2)}`
+            const x1 = a + dx * i;
+            const x2 = a + dx * i + dx / 2;
+            const xc = a + dx * i + dx / 4;
+            const y1 = f(x1);
+            const y2 = f(x2);
+            const yc = f(xc);
+            const xBez = 2*xc - x1/2 - x2/2;
+            const yBez = 2*yc - y1/2 - y2/2;
+            return Math.abs(f(x + dx/2)) - Math.abs(f(x)) > 0 ? '' : `M${x0 + xStretch * x1} ${y0 - yStretch * y1} Q ${x0 + xStretch * xBez},${y0 - yStretch * yBez} ${x0 + xStretch * x2},${y0 - yStretch * y2} L ${x0 + xStretch * x1} ${y0 - yStretch * y2}`
         }).join("") + Array(n).fill(1).map((_, i) => {
             const x = a + dx * i;
-            return Math.abs(f(x)) - Math.abs(f(x + dx/2)) > 0 ? '' : `M${x0 + pixelStep / 2 + pixelStep * i} ${y0 - yStretch * f(x + dx / 2)} L${x0 + pixelStep * (i + 1)} ${y0 - yStretch * f(x + dx / 2)} L${x0 + pixelStep * (i + 1)} ${y0 - yStretch * f(x + dx)}`
+            const x1 = a + dx * i + dx / 2;
+            const x2 = a + dx * i + dx;
+            const xc = a + dx * i + dx / 2 + dx / 4;
+            const y1 = f(x1);
+            const y2 = f(x2);
+            const yc = f(xc);
+            const xBez = 2*xc - x1/2 - x2/2;
+            const yBez = 2*yc - y1/2 - y2/2;
+            return Math.abs(f(x)) - Math.abs(f(x + dx/2)) > 0 ? '' : `M${x0 + xStretch * x1} ${y0 - yStretch * y1} Q ${x0 + xStretch * xBez},${y0 - yStretch * yBez} ${x0 + xStretch * x2},${y0 - yStretch * y2} L ${x0 + xStretch * x2} ${y0 - yStretch * y1}`
         }).join("")
     }
 
@@ -119,25 +149,7 @@ const loadSlides = () => {
     }
 
     const simpsons = (x0, y0, w, h, a, b, f, n, yFin) => {
-        const getParabola = (c1, c2, c3) => {
-            const [x1, y1] = c1;
-            const [x2, y2] = c2;
-            const [x3, y3] = c3;
-            denom = (x1 - x2)*(x1 - x3)*(x2 - x3)
-            const a = (x3 * (y2 - y1) + x2 * (y1 - y3) + x1 * (y3 - y2))
-            const b = (x3*x3 * (y1 - y2) + x2*x2 * (y3 - y1) + x1*x1 * (y2 - y3))
-            const c = (x2 * x3 * (x2 - x3) * y1 + x3 * x1 * (x3 - x1) * y2 + x1 * x2 * (x1 - x2) * y3)
-            return [a, b, c]
-        }
-
-        const vertexForm = (a, b, c) => {
-            const h = -b/(2*a);
-            const k = c - Math.pow(b, 2) / (4*a)
-            return [a, h, k]
-        }
-
         const dx = (b - a) / n;
-        const pixelStep = w / n;
         const yStretch = h / yFin;
         const xStretch = w / (b - a)
         return Array(n).fill(1).map((_, i) => {
@@ -149,13 +161,6 @@ const loadSlides = () => {
             const yc = f(xc);
             const xBez = 2*xc - x1/2 - x2/2;
             const yBez = 2*yc - y1/2 - y2/2;
-            // console.log("X1", x1, x0 + pixelStep * i, x0 + xStretch * x1);
-            // console.log("X2", x2, x0 + pixelStep * (i + 1), x0 + xStretch * x2);
-            // console.log("XC", xc, x0 + pixelStep * i + pixelStep / 2, x0 + xStretch * xc);
-            // console.log("Y1", y1, y0 - yStretch * f(x0 + dx * i), y0 - yStretch * y1);
-            // console.log("Y2", y2, y0 - yStretch * f(x0 + dx * (i + 1)), y0 - yStretch * y2);
-            // console.log("YC", yc, y0 - yStretch * f(x0 + dx * i + dx / 2), y0 - yStretch * yc);
-            // console.log("XBEZ", xBez)
             return `M ${x0 + xStretch * x1} ${y0} L${x0 + xStretch * x1} ${y0 - yStretch * y1} Q ${x0 + xStretch * xBez},${y0 - yStretch * yBez} ${x0 + xStretch * x2},${y0 - yStretch * y2} L ${x0 + xStretch * x2} ${y0}`;
         }).join("")
     }
@@ -184,6 +189,7 @@ const loadSlides = () => {
     let xAxisBottom = {
         ...xAxisFig,
         points: xAxis(width / 2, vizHeight / 2 + figHeight / 2, figWidth, 3),
+        cy: vizHeight / 2 + figHeight / 2 
     }
 
     const lineYEqualsX = {
@@ -269,71 +275,102 @@ const loadSlides = () => {
         cy: vizHeight / 2
     }][0];
 
-    const simpsonSVG = (halfX, a, b, n, f, yFin) => {
-        n = 5;
-        return Array(n).fill(1).map((_, i) => {
-            dx = (b - a) / n
-            return {
-                svgType: "path",
-                points: simpsons(width / 2 - figWidth / 2, vizHeight / 2 + (halfX ? 0 : figHeight / 2), figWidth / n, figHeight, a + dx * i, a + dx * (i + 1), f, 1, yFin * (halfX ? 2 : 1)),
-                fill: colors.areaColor,
-                stroke: colors.rectangleColor,
-                strokeWidth: 3,
-                alpha: .5,
-                strokeAlpha: .4,
-                cx: width / 2 - figWidth / 2,
-                cy: vizHeight / 2
-        }})
-    };
+    const simpsonSVG = (halfX, a, b, n, f, yFin) => [{
+        svgType: "path",
+        points: simpsons(width / 2 - figWidth / 2, vizHeight / 2 + (halfX ? 0 : figHeight / 2), figWidth, figHeight, a, b, f, n, yFin * (halfX ? 2 : 1)),
+        fill: colors.areaColor,
+        stroke: colors.rectangleColor,
+        strokeWidth: 3,
+        alpha: .5,
+        strokeAlpha: .4,
+        cx: width / 2 - figWidth / 2,
+        cy: vizHeight / 2
+    }][0]
 
     // Shapes to render
     let slides = [
-        // [
-        //     xAxisBottom,
-        //     yAxisFig,
-        //     lineYEqualsX,
-        // ],
-        // [
-        //     xAxisBottom,
-        //     yAxisFig,
-        //     lineYEqualsX,
-        //     mramSVG(false, 0, 6.28, 8, x=>x, 6.28),
-        // ],
-        // [
-        //     xAxisBottom,
-        //     yAxisFig,
-        //     lineYEqualsX,
-        //     mramSVG(false, 0, 6.28, 8, x=>x, 6.28),
-        //     ...mramErr(false, 0, 6.28, 8, x=>x, 6.28)
-        // ],
-        // [
-        //     xAxisFig,
-        //     yAxisFig,
-        //     sinCurve,
-        //     mramSVG(true, 0, 6.28, 8, Math.sin, 1)
-        // ],
-        // [
-        //     xAxisFig,
-        //     yAxisFig,
-        //     sinCurve,
-        //     mramSVG(true, 0, 6.28, 8, Math.sin, 1),
-        //     ...mramErr(true, 0, 6.28, 8, Math.sin, 1)
-        // ],
-        // [
-        //     xAxisBottom,
-        //     yAxisFig,
-        //     parabola,
-        //     trapezoidSVG(false, 0, 10, 3, x => Math.pow(x - 5, 2), 25),
-        //     yAxisFig
-        // ],
+        [
+            xAxisBottom,
+            {...yAxisFig, cy: vizHeight / 2 + figHeight / 2},
+            lineYEqualsX,
+        ],
+        [
+            xAxisBottom,
+            yAxisFig,
+            lineYEqualsX,
+            mramSVG(false, 0, 6.28, 1, x=>x, 6.28),
+        ],
+        [
+            xAxisBottom,
+            yAxisFig,
+            lineYEqualsX,
+            mramSVG(false, 0, 6.28, 1, x=>x, 6.28),
+            ...mramErr(false, 0, 6.28, 1, x=>x, 6.28)
+        ],
+        [
+            xAxisBottom,
+            yAxisFig,
+            lineYEqualsX,
+            mramSVG(false, 0, 6.28, 8, x=>x, 6.28),
+        ],
+        [
+            xAxisBottom,
+            yAxisFig,
+            lineYEqualsX,
+            mramSVG(false, 0, 6.28, 8, x=>x, 6.28),
+            ...mramErr(false, 0, 6.28, 8, x=>x, 6.28)
+        ],
         [
             xAxisFig,
             yAxisFig,
             sinCurve,
-            ...simpsonSVG(true, 0, 6.28, 2, Math.sin, 1),
+            mramSVG(true, 0, 6.28, 8, Math.sin, 1),
+            ...mramErr(true, 0, 6.28, 8, Math.sin, 1)
+        ],
+        [
+            xAxisFig,
+            yAxisFig,
+            sinCurve,
+            mramSVG(true, 0, 6.28, 8, Math.sin, 1),
+            ...mramErr(true, 0, 6.28, 8, Math.sin, 1),
+            {
+                svgType: "path",
+                points: `M ${width / 2 - figWidth / 2 + figWidth / 8 - 10} ${vizHeight / 2 - figHeight / 2 - 10} L ${width / 2 - figWidth / 2 + 3 * figWidth / 8 + 10} ${vizHeight / 2 - figHeight / 2 - 10} L ${width / 2 - figWidth / 2 + 3 * figWidth / 8 + 10} ${vizHeight / 2 - figHeight / 3} L ${width / 2 - figWidth / 2 + figWidth / 8 - 10} ${vizHeight / 2 - figHeight / 3} Z`,
+                fill: colors.areaColor,
+                stroke: colors.curveColor,
+                strokeWidth: 1.5,
+                alpha: 0,
+                strokeAlpha: 1,
+                cx: width / 2 - figWidth / 2,
+                cy: vizHeight / 2
+            }
+        ],
+        [
+            xAxisFig,
+            yAxisFig,
+            sinCurve,
+            // trapezoidSVG(false, 0, 10, 3, x => Math.pow(x - 5, 2), 25),
+            trapezoidSVG(true, 0, 6.28, 8, Math.sin, 1),
+            ...mramErr(true, 0, 6.28, 8, Math.sin, 1).map(d => {return {...d, alpha: 0, strokeAlpha: 0}}),
+        ],
+        [
+            xAxisFig,
+            yAxisFig,
+            sinCurve,
+            simpsonSVG(true, 0, 6.28, 8, Math.sin, 1),
+            ...mramErr(true, 0, 6.28, 8, Math.sin, 1).map(d => {return {...d, alpha: 0, strokeAlpha: 0}}),
+            {},
             yAxisFig
         ],
-        
+        // [
+        //     xAxisFig,
+        //     yAxisFig,
+        //     sinCurve,
+        //     simpsonSVG(true, 0, 6.28, 2, Math.sin, 1),
+        //     ...mramErr(true, 0, 6.28, 8, Math.sin, 1).map(d => {return {...d, alpha: 0, strokeAlpha: 0}}),
+        //     {},
+        //     yAxisFig
+        // ],
     ];
 
     // Texts to render

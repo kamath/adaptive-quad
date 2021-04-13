@@ -7,12 +7,12 @@ const heightToWidth = 1920 / 1080;
 const widthToHeight = 1080 / 1920;
 
 const colors = {
-    rectangleBackground: "11,57,84",
-    axisColor: "255,200,42",
-    curveColor: "255,90,95",
+    rectangleBackground: "29,53,87",
+    axisColor: "241,250,238",
+    curveColor: "168,218,220",
     transparent: "0,0,0",
-    areaColor: "191,215,234",
-    rectangleColor: "200,29,37",
+    areaColor: "69,123,157",
+    rectangleColor: "168,218,220",
 }
 
 const textHeight = .2 * baseHeight
@@ -45,44 +45,34 @@ const loadSlides = () => {
     const yAxis = (x, y, h, strokeWidth) => `${x-strokeWidth/2},${y + h/2} ${x-strokeWidth/2},${y - h/2} ${x+strokeWidth/2},${y - h/2} ${x+strokeWidth/2},${y + h/2}`
     const xAxis = (x, y, w, strokeWidth) => `${x-w/2},${y + strokeWidth/2} ${x-w/2},${y - strokeWidth/2} ${x+w/2},${y - strokeWidth/2} ${x+w/2},${y + strokeWidth/2}`
 
-    const plot = (x, y, w, h, a, b, f, step, closePath = false) => {
-        const steps = Math.ceil((b - a) / step);
-        figStep = step * w / (b - a) // Resize to current width
-        let ys = [];
-        let xs = [];
-        // points.push(`${x},${y}`)
-        for (let i = 0; i <= steps; i++) {
-            ys.push(f(a + step * i));
-            xs.push(figStep * i)
-        }
-        maxY = Math.max(...ys.map(x => Math.abs(x)));
-        dy = h / maxY / 2;
-        ys = ys.map(d => y - d * dy);
-        points = ys.map((d, i) => `${x + figStep * i},${d}`)
-        console.log("POINTS", points.join(' '))
-        return `M${x},${y} L` + points.join(' L') + (closePath ? `M${w},${y} M${x},${y}` : "")
+    const plot = (x0, y0, w, h, a, b, f, n, yFin, closePath = false) => {
+        const dx = (b - a) / n;
+        console.log("DX", dx)
+        // const yFin = Math.max(...Array(n).fill(1).map((_, i) => Math.abs(f(a + dx * i))));
+        console.log("YFIN", yFin)
+        const yStretch = h / yFin;
+        const pixelStep = w / n;
+        return `M ${x0} ${y0}` + Array(n + 1).fill(1).map((_, i) => {
+            const x = a + dx * i;
+            console.log("X", x)
+            return `L${x0 + pixelStep * i} ${y0 - yStretch * f(x)}`
+        }).join(" ")
     }
 
-    const LRAM = (x, y, w, h, a, b, f, step) => {
-        const steps = Math.ceil((b - a) / step);
-        figStep = step * w / (b - a) // Resize to current width
-        let ys = [];
-        let xs = [];
-        // points.push(`${x},${y}`)
-        for (let i = 0; i < steps - 1; i++) {
-            ys.push(f(a + step * i));
-            xs.push(figStep * i)
-        }
-        maxY = Math.max(...ys.map(x => Math.abs(x)));
-        dy = h / maxY / 2;
-        ys = ys.map(d => y - d * dy);
-        points = ys.map((d, i) => `${x + figStep * i},${d}`)
-        console.log("POINTS", points.join(' '))
-            // return `M${x},${y} L` + points.join(' L');
-
-        return `M${x},${y}` + ys.map((yPoint, i) => {
-            return `L${x + figStep * i},${y} L${x+figStep*i},${yPoint} L${x+figStep*(i+1)},${yPoint} L${x+figStep*(i+1)},${y}`
-        }).join(" ")
+    const MRAM = (x0, y0, w, h, a, b, f, n, yFin) => {
+        const dx = (b - a) / n;
+        const pixelStep = w / n;
+        console.log("N", n)
+        // const yFin = Math.max(...Array(n).fill(1).map((_, i) => Math.abs(f(a + dx * i))))
+        console.log("YFIN PATH", yFin)
+        const yStretch = h / yFin;
+        return `M${x0},${y0}` + Array(n).fill(1).map((_, i) => {
+            const x = a + dx * i;
+            // const y = 
+            // console.log("X", x, y0 - yStretch * f(x))
+            return `M${x0 + pixelStep * i} ${y0} L ${x0 + pixelStep * i} ${y0} L ${x0 + pixelStep * i} ${y0 - yStretch * f(x + dx/2)} L ${x0 + pixelStep * (i + 1)} ${y0 - yStretch * f(x + dx/2)} L ${x0 + pixelStep * (i + 1)} ${y0}`
+        }).join("")
+        return ""
     }
 
     let i = 0;
@@ -106,6 +96,11 @@ const loadSlides = () => {
         cy: vizHeight / 2
     }
 
+    let xAxisBottom = {
+        ...xAxisFig,
+        points: xAxis(width / 2, vizHeight / 2 + figHeight / 2, figWidth, 3),
+    }
+
     // Shapes to render
     let slides = [
         [
@@ -113,7 +108,7 @@ const loadSlides = () => {
             yAxisFig,
             {
                 svgType: "path",
-                points: plot(width / 2 - figWidth / 2, vizHeight / 2, figWidth, figHeight, 0, 6.28, Math.sin, .01),
+                points: plot(width / 2 - figWidth / 2, vizHeight / 2, figWidth, figHeight, 0, 6.28, Math.sin, 100, 2),
                 fill: colors.transparent,
                 stroke: colors.curveColor,
                 strokeWidth: 3,
@@ -128,7 +123,7 @@ const loadSlides = () => {
             yAxisFig,
             {
                 svgType: "path",
-                points: plot(width / 2 - figWidth / 2, vizHeight / 2, figWidth, figHeight, 0, 6.28, Math.sin, .01),
+                points: plot(width / 2 - figWidth / 2, vizHeight / 2, figWidth, figHeight, 0, 6.28, Math.sin, 100, 2),
                 fill: colors.areaColor,
                 stroke: colors.curveColor,
                 strokeWidth: 3,
@@ -139,27 +134,23 @@ const loadSlides = () => {
             },
             {
                 svgType: "path",
-                points: LRAM(width / 2 - figWidth / 2, vizHeight / 2, figWidth, figHeight, 0, 6.28, Math.sin, .5),
+                points: MRAM(width / 2 - figWidth / 2, vizHeight / 2, figWidth, figHeight, 0, 6.28, Math.sin, 8, 2),
                 fill: colors.areaColor,
                 stroke: colors.rectangleColor,
                 strokeWidth: 3,
                 alpha: .5,
-                strokeAlpha: 0,
+                strokeAlpha: 0.4,
                 cx: width / 2 - figWidth / 2,
                 cy: vizHeight / 2
             },
         ],
-        [{
-                points: xAxis(width / 2, vizHeight / 2 + figHeight / 2, figWidth, 3),
-                fill: colors.axisColor,
-                cx: width / 2 - figWidth / 2,
-                cy: vizHeight / 2
-            },
+        [
+            xAxisBottom,
             yAxisFig,
             {
                 svgType: "path",
-                points: plot(width / 2 - figWidth / 2, vizHeight / 2 + figHeight / 2, figWidth, figHeight, 0, 6.28, x => x, .01),
-                fill: colors.transparent,
+                points: plot(width / 2 - figWidth / 2, vizHeight / 2 + figHeight / 2, figWidth, figHeight, 1, 6.28, Math.log, 100, 2),
+                fill: colors.areaColor,
                 stroke: colors.curveColor,
                 strokeWidth: 3,
                 alpha: 0,
@@ -169,16 +160,16 @@ const loadSlides = () => {
             },
             {
                 svgType: "path",
-                points: LRAM(width / 2 - figWidth / 2, vizHeight / 2 + figHeight / 2, figWidth, figHeight, 0, 6.28, x => x, .5),
+                points: MRAM(width / 2 - figWidth / 2, vizHeight / 2 + figHeight / 2, figWidth, figHeight, 1, 6.28, Math.log, 8, 2),
                 fill: colors.areaColor,
                 stroke: colors.rectangleColor,
                 strokeWidth: 3,
                 alpha: .5,
-                strokeAlpha: 0,
+                strokeAlpha: .4,
                 cx: width / 2 - figWidth / 2,
                 cy: vizHeight / 2
             },
-        ]
+        ],
     ];
 
     // Texts to render
@@ -233,7 +224,8 @@ const loadSlides = () => {
                         points.split(" ").map(x => `${x.split(",")[0]},${cy}`).join(" "))
                     toAnimate.transition().duration(transitionSpeed).attr(svgType === "polygon" ? "points" : "d", points).attr("stroke", `rgba(${stroke},${strokeAlpha})`).style("stroke-width", `${strokeWidth}px`).attr("fill", `rgba(${fill},${alpha})`)
                 } else {
-                    toAnimate.attr("d", points).transition().duration(transitionSpeed)
+                    toAnimate.attr("d", "").transition().duration(transitionSpeed)
+                        .attr("d", points)
                         .attr("stroke", `rgba(${stroke},${strokeAlpha})`).style("stroke-width", `${strokeWidth}px`).attr("fill", `rgba(${fill},${alpha})`)
                 }
             }

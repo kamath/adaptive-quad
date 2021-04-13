@@ -72,7 +72,46 @@ const loadSlides = () => {
             // console.log("X", x, y0 - yStretch * f(x))
             return `M${x0 + pixelStep * i} ${y0} L ${x0 + pixelStep * i} ${y0} L ${x0 + pixelStep * i} ${y0 - yStretch * f(x + dx/2)} L ${x0 + pixelStep * (i + 1)} ${y0 - yStretch * f(x + dx/2)} L ${x0 + pixelStep * (i + 1)} ${y0}`
         }).join("")
-        return ""
+    }
+
+    const MRAMErrorAbove = (x0, y0, w, h, a, b, f, n, yFin) => {
+        const dx = (b - a) / n;
+        const pixelStep = w / n;
+        console.log("N", n)
+        // const yFin = Math.max(...Array(n).fill(1).map((_, i) => Math.abs(f(a + dx * i))))
+        console.log("YFIN PATH", yFin)
+        const yStretch = h / yFin;
+        return `M${x0},${y0}` + Array(n).fill(1).map((_, i) => {
+            const x = a + dx * i;
+            // const y = 
+            // console.log("X", x, y0 - yStretch * f(x))
+            return Math.abs(f(x + dx/2)) - Math.abs(f(x)) < 0 ? '' : `M${x0 + pixelStep * i} ${y0 - yStretch * f(x)} L${x0 + pixelStep * i} ${y0 - yStretch * f(x + dx/2)} L${x0 + pixelStep * i + pixelStep / 2} ${y0 - yStretch * f(x + dx/2)}`
+        }).join("") + Array(n).fill(1).map((_, i) => {
+            const x = a + dx * i;
+            // const y = 
+            // console.log("X", x, y0 - yStretch * f(x))
+            return Math.abs(f(x)) - Math.abs(f(x + dx/2)) < 0 ? '' : `M${x0 + pixelStep / 2 + pixelStep * i} ${y0 - yStretch * f(x + dx / 2)} L${x0 + pixelStep * (i + 1)} ${y0 - yStretch * f(x + dx / 2)} L${x0 + pixelStep * (i + 1)} ${y0 - yStretch * f(x + dx)}`
+        }).join("")
+    }
+
+    const MRAMErrorBelow = (x0, y0, w, h, a, b, f, n, yFin) => {
+        const dx = (b - a) / n;
+        const pixelStep = w / n;
+        console.log("N", n)
+        // const yFin = Math.max(...Array(n).fill(1).map((_, i) => Math.abs(f(a + dx * i))))
+        console.log("YFIN PATH", yFin)
+        const yStretch = h / yFin;
+        return `M${x0},${y0}` + Array(n).fill(1).map((_, i) => {
+            const x = a + dx * i;
+            // const y = 
+            // console.log("X", x, y0 - yStretch * f(x))
+            return Math.abs(f(x + dx/2)) - Math.abs(f(x)) > 0 ? '' : `M${x0 + pixelStep * i} ${y0 - yStretch * f(x)} L${x0 + pixelStep * i} ${y0 - yStretch * f(x + dx/2)} L${x0 + pixelStep * i + pixelStep / 2} ${y0 - yStretch * f(x + dx/2)}`
+        }).join("") + Array(n).fill(1).map((_, i) => {
+            const x = a + dx * i;
+            // const y = 
+            // console.log("X", x, y0 - yStretch * f(x))
+            return Math.abs(f(x)) - Math.abs(f(x + dx/2)) > 0 ? '' : `M${x0 + pixelStep / 2 + pixelStep * i} ${y0 - yStretch * f(x + dx / 2)} L${x0 + pixelStep * (i + 1)} ${y0 - yStretch * f(x + dx / 2)} L${x0 + pixelStep * (i + 1)} ${y0 - yStretch * f(x + dx)}`
+        }).join("")
     }
 
     let i = 0;
@@ -104,19 +143,93 @@ const loadSlides = () => {
     // Shapes to render
     let slides = [
         [
-            xAxisFig,
+            xAxisBottom,
             yAxisFig,
             {
                 svgType: "path",
-                points: plot(width / 2 - figWidth / 2, vizHeight / 2, figWidth, figHeight, 0, 6.28, Math.sin, 100, 2),
-                fill: colors.transparent,
+                points: plot(width / 2 - figWidth / 2, vizHeight / 2 + figHeight / 2, figWidth, figHeight, 0, 6.28, x => x, 100, 6.28),
+                fill: colors.areaColor,
                 stroke: colors.curveColor,
                 strokeWidth: 3,
                 alpha: 0,
                 strokeAlpha: 1,
                 cx: width / 2 - figWidth / 2,
                 cy: vizHeight / 2
-            }
+            },
+        ],
+        [
+            xAxisBottom,
+            yAxisFig,
+            {
+                svgType: "path",
+                points: plot(width / 2 - figWidth / 2, vizHeight / 2 + figHeight / 2, figWidth, figHeight, 0, 6.28, x => x, 100, 6.28),
+                fill: colors.areaColor,
+                stroke: colors.curveColor,
+                strokeWidth: 3,
+                alpha: 0,
+                strokeAlpha: 1,
+                cx: width / 2 - figWidth / 2,
+                cy: vizHeight / 2
+            },
+            {
+                svgType: "path",
+                points: MRAM(width / 2 - figWidth / 2, vizHeight / 2 + figHeight / 2, figWidth, figHeight, 0, 6.28, x => x, 8, 6.28),
+                fill: colors.areaColor,
+                stroke: colors.rectangleColor,
+                strokeWidth: 3,
+                alpha: .5,
+                strokeAlpha: .4,
+                cx: width / 2 - figWidth / 2,
+                cy: vizHeight / 2
+            },
+        ],
+        [
+            xAxisBottom,
+            yAxisFig,
+            {
+                svgType: "path",
+                points: plot(width / 2 - figWidth / 2, vizHeight / 2 + figHeight / 2, figWidth, figHeight, 0, 6.28, x => x, 100, 6.28),
+                fill: colors.areaColor,
+                stroke: colors.curveColor,
+                strokeWidth: 3,
+                alpha: 0,
+                strokeAlpha: 1,
+                cx: width / 2 - figWidth / 2,
+                cy: vizHeight / 2
+            },
+            {
+                svgType: "path",
+                points: MRAM(width / 2 - figWidth / 2, vizHeight / 2 + figHeight / 2, figWidth, figHeight, 0, 6.28, x => x, 8, 6.28),
+                fill: colors.areaColor,
+                stroke: colors.rectangleColor,
+                strokeWidth: 3,
+                alpha: .5,
+                strokeAlpha: .4,
+                cx: width / 2 - figWidth / 2,
+                cy: vizHeight / 2
+            },
+            {
+                svgType: "path",
+                points: MRAMErrorAbove(width / 2 - figWidth / 2, vizHeight / 2 + figHeight / 2, figWidth, figHeight, 0, 6.28, x => x, 8, 6.28),
+                fill: "0,255,0",
+                stroke: "0,255,0",
+                strokeWidth: 3,
+                alpha: .5,
+                strokeAlpha: 0,
+                cx: width / 2 - figWidth / 2,
+                cy: vizHeight / 2
+            },
+            {
+                svgType: "path",
+                points: MRAMErrorBelow(width / 2 - figWidth / 2, vizHeight / 2 + figHeight / 2, figWidth, figHeight, 0, 6.28, x => x, 8, 6.28),
+                fill: "255,0,0",
+                stroke: "255,0,0",
+                strokeWidth: 3,
+                alpha: .5,
+                strokeAlpha: 0,
+                cx: width / 2 - figWidth / 2,
+                cy: vizHeight / 2
+            },
         ],
         [
             xAxisFig,
@@ -145,11 +258,11 @@ const loadSlides = () => {
             },
         ],
         [
-            xAxisBottom,
+            xAxisFig,
             yAxisFig,
             {
                 svgType: "path",
-                points: plot(width / 2 - figWidth / 2, vizHeight / 2 + figHeight / 2, figWidth, figHeight, 1, 6.28, Math.log, 100, 2),
+                points: plot(width / 2 - figWidth / 2, vizHeight / 2, figWidth, figHeight, 0, 6.28, Math.sin, 100, 2),
                 fill: colors.areaColor,
                 stroke: colors.curveColor,
                 strokeWidth: 3,
@@ -160,12 +273,34 @@ const loadSlides = () => {
             },
             {
                 svgType: "path",
-                points: MRAM(width / 2 - figWidth / 2, vizHeight / 2 + figHeight / 2, figWidth, figHeight, 1, 6.28, Math.log, 8, 2),
+                points: MRAM(width / 2 - figWidth / 2, vizHeight / 2, figWidth, figHeight, 0, 6.28, Math.sin, 8, 2),
                 fill: colors.areaColor,
                 stroke: colors.rectangleColor,
                 strokeWidth: 3,
                 alpha: .5,
-                strokeAlpha: .4,
+                strokeAlpha: 0.4,
+                cx: width / 2 - figWidth / 2,
+                cy: vizHeight / 2
+            },
+            {
+                svgType: "path",
+                points: MRAMErrorAbove(width / 2 - figWidth / 2, vizHeight / 2, figWidth, figHeight, 0, 6.28, Math.sin, 8, 2),
+                fill: "0,255,0",
+                stroke: "0,255,0",
+                strokeWidth: 3,
+                alpha: .5,
+                strokeAlpha: 0,
+                cx: width / 2 - figWidth / 2,
+                cy: vizHeight / 2
+            },
+            {
+                svgType: "path",
+                points: MRAMErrorBelow(width / 2 - figWidth / 2, vizHeight / 2, figWidth, figHeight, 0, 6.28, Math.sin, 8, 2),
+                fill: "255,0,0",
+                stroke: "255,0,0",
+                strokeWidth: 3,
+                alpha: .5,
+                strokeAlpha: 0,
                 cx: width / 2 - figWidth / 2,
                 cy: vizHeight / 2
             },

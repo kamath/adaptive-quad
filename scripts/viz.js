@@ -366,6 +366,12 @@ const loadSlides = (font) => {
             ...mramErr(false, 0, 6.28, 8, x => x, 6.28)
         ],
         [
+            xAxisBottom,
+            yAxisFig,
+            lineYEqualsX,
+            mramSVG(false, 0, 6.28, 8, x => x, 6.28),
+            ...mramErr(false, 0, 6.28, 8, x => x, 6.28)
+        ].map(d => { return {...d, alpha: 0.1, strokeAlpha: 0.1 } }), [
             xAxisFig,
             yAxisFig,
             sinCurve,
@@ -383,7 +389,7 @@ const loadSlides = (font) => {
                 points: `M ${width / 2 - figWidth / 2 + figWidth / 8 - 10} ${vizHeight / 2 - figHeight / 2 - 10} L ${width / 2 - figWidth / 2 + 3 * figWidth / 8 + 10} ${vizHeight / 2 - figHeight / 2 - 10} L ${width / 2 - figWidth / 2 + 3 * figWidth / 8 + 10} ${vizHeight / 2 - figHeight / 3} L ${width / 2 - figWidth / 2 + figWidth / 8 - 10} ${vizHeight / 2 - figHeight / 3} Z`,
                 fill: colors.areaColor,
                 stroke: colors.curveColor,
-                strokeWidth: 1.5,
+                strokeWidth: 3,
                 alpha: 0,
                 strokeAlpha: 1,
                 cx: width / 2 - figWidth / 2,
@@ -407,71 +413,87 @@ const loadSlides = (font) => {
             {},
             yAxisFig
         ],
-        // [
-        //     xAxisFig,
-        //     yAxisFig,
-        //     sinCurve,
-        //     simpsonSVG(true, 0, 6.28, 2, Math.sin, 1),
-        //     ...mramErr(true, 0, 6.28, 8, Math.sin, 1).map(d => {return {...d, alpha: 0, strokeAlpha: 0}}),
-        //     {},
-        //     yAxisFig
-        // ],
     ];
 
     // Texts to render
-    const textSpacer = 20
+    const textSpacer = 20;
+    const h1Size = 65;
+    const h3Size = 45;
     let texts = [
         [
-            ["plaintext", "Click", width / 2, height / 2 - 36, 72],
-            ["plaintext", "Keep clicking to continue", width / 2, height / 2 + 36, 50],
+            ["plaintext", "Click anywhere to Start", width / 2, height / 2 - 36, h1Size],
+            ["plaintext", "Keep clicking to continue", width / 2, height / 2 + 36, h3Size],
         ],
         [
-            ["plaintext", "OWA OWA", width / 2, height / 2 - 36, 72],
+            ["plaintext", "How do we find the area between this line and the x-axis?", width / 2, height / 2 + figHeight / 2],
+        ],
+        [
+            ["plaintext", "It's equivalent to the area of a rectangle with half the height", width / 2, height / 2 + figHeight / 2],
+            ["plaintext", "Basic geometry: area of a triangle = 1/2 * bh", width / 2, height / 2 + figHeight / 2 + 50, h3Size],
+        ],
+        [
+            ["plaintext", "It's equivalent to the area of a rectangle with half the height", width / 2, height / 2 + figHeight / 2, , false],
+            ["plaintext", "Basic geometry: area of a triangle = 1/2 * bh", width / 2, height / 2 + figHeight / 2 + 50, h3Size, false],
+            ["plaintext", "The green surplus balances out the excluded red area", width / 2, height / 2 + figHeight / 2 + 150, h3Size],
+        ],
+        [
+            ["plaintext", "For a line, we can do this with any number of rectangles", width / 2, height / 2 + figHeight / 2],
+        ],
+        [
+            ["plaintext", "For a line, we can do this with any number of rectangles", width / 2, height / 2 + figHeight / 2, , false],
+            ["plaintext", "The areas still balance out", width / 2, height / 2 + figHeight / 2 + 50, h3Size],
+        ],
+        [
+            ["plaintext", "But what about other functions?", width / 2, height / 2, h1Size],
+        ],
+        [
+            ["plaintext", "...it doesn't balance out as well", width / 2, height / 2 + figHeight / 2],
+        ],
+        [
+            ["plaintext", "...it doesn't balance out as well", width / 2, height / 2 + figHeight / 2, , false],
+            ["plaintext", "Imbalance!", width / 2 - figWidth / 2 + 3 * figWidth / 8 + 30, vizHeight / 2 - 5 * figHeight / 12, , , false, true],
+        ],
+        [
+            ["plaintext", "A better approach would replace rectangles with trapezoids", width / 2, height / 2 + figHeight / 2],
+        ],
+        [
+            ["plaintext", "Or better yet... parabolas", width / 2, height / 2 + figHeight / 2],
         ]
     ];
 
     // Render the text and animate if necessary
-    const renderText = (i, ind, textType, text, x, y, size = 72, animate = true) => {
+    const renderText = (i, ind, textType, text, x, y, size = Math.min(figHeight / 5, 50), animate = true, centerAlign = true, leftAlign = false, rightAlign = false) => {
         console.log("GOT TEXT", text)
         if (textType === "plaintext") {
-            if (i > 0 && ind < texts[i - 1].length) {
-                const prevPath = font.getPath(texts[i - 1][ind][1], 0, size, size).commands;
+            const g = canvas.append("g");
+            const path = g.append("path");
+            path.attr("class", "textSVG")
+            if (i > 0 && ind < texts[i - 1].length && animate) {
+                const [prevTextType, prevText, prevX, prevY, prevSize = 72, prevAnimate = false] = texts[i - 1][ind]
+                const prevPath = font.getPath(prevText, 0, prevSize, prevSize).commands;
                 const [d, bbox] = toPathData(prevPath, 5)
-                const g = canvas.append("g");
-                const path = g.append("path");
-                g.attr("transform", `translate(${x - bbox.width / 2} ${y - bbox.height})`)
 
-                path.attr("d", d.replaceAll("Z", "") + "Z")
-                    .attr("class", animate ? "animate" : "")
+                path.attr("d", d)
+                    .attr("class", "textSVG " + (animate ? "animate" : ""))
                     .attr("id", `path_${i}_${ind}`);
 
                 const curPath = font.getPath(text, 0, size, size).commands;
-                [dNext, bboxNext] = toPathData(curPath, 0, size, size);
-                let origPath = Snap.select(`#path_${i}_${ind}`);
-
-                var fix = function() {
-                    // origPath.animate({ d: d.replaceAll("Z", "") }, 1000, toFancy);
-                    origPath.animate({ d: dNext }, 1000, mina.backout, toSimple);
-                }
-
-                var toSimple = function() {
-                    // origPath.animate({ d: d.replaceAll("Z", "") }, 1000, toFancy);
-                    origPath.animate({ d: dNext.replaceAll("Z", "") }, 1000, mina.backout, fix);
-                }
-
-                console.log("ORIGPATH", origPath)
-
-                toSimple()
+                const [dNext, bboxNext] = toPathData(curPath, 0, size, size);
+                g.attr("transform", `translate(${prevX - bbox.width / 2} ${prevY - bbox.height})`)
+                    .transition().duration(transitionSpeed)
+                    .attr("transform", `translate(${x - bboxNext.width / 2} ${y - bboxNext.height})`)
+                path.attr("d", d).transition().duration(transitionSpeed / 2)
+                    .attr("d", dNext)
             } else {
+                console.log("REACHING HERE. ANIMATE:", animate)
                 const textPath = font.getPath(text, 0, size, size).commands;
                 const [d, bbox] = toPathData(textPath, 5)
-                const g = canvas.append("g");
-                const path = g.append("path");
-                g.attr("transform", `translate(${x - bbox.width / 2} ${y - bbox.height})`)
+                g.attr("transform", centerAlign ? `translate(${x - bbox.width / 2} ${y - bbox.height})` : (leftAlign ? `translate(${x} ${y - bbox.height})` : `translate(${x + bbox.width / 2} ${y - bbox.height})`))
 
                 path.attr("d", d.replaceAll("Z", ""))
-                    .attr("class", animate ? "animate" : "")
+                    .attr("class", "textSVG " + (animate ? "animate" : ""))
                     .attr("id", `path_${i}_${ind}`)
+                    .attr("shape-rendering", "auto")
             }
             return
         }
@@ -495,6 +517,7 @@ const loadSlides = (font) => {
 
     // Render the slides
     const renderSlides = (i, prevI) => {
+        if (i < texts.length) texts[i].forEach((a, ind) => renderText(i, ind, ...a))
         slides[i].forEach((slide, ind) => {
             const { svgType = "polygon", points, fill, stroke = colors.transparent, strokeWidth = 0, cx, cy, alpha = 1, strokeAlpha = 0, animate = true } = slide
             // Match the element with the same element at the previous index and animate the difference
@@ -526,7 +549,6 @@ const loadSlides = (font) => {
                 }
             }
         });
-        texts[i].forEach((a, ind) => renderText(i, ind, ...a))
     }
 
     // Next slide on click, go back to beginning if at the end

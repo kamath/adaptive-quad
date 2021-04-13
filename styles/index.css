@@ -32,9 +32,12 @@ polygon {
     -webkit-animation: dash ease 1;
     animation-fill-mode: forwards;
     -webkit-animation-fill-mode: forwards;
-    animation-duration: 1s;
+    animation-duration: 3s;
     -webkit-animation-duration: 1s;
     stroke-width: 15px;
+}
+
+.textSVG {
     fill: white;
     stroke: white;
 }

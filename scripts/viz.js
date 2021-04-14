@@ -480,9 +480,9 @@ const loadSlides = (font) => {
                 const curPath = font.getPath(text, 0, size, size).commands;
                 const [dNext, bboxNext] = toPathData(curPath, 0, size, size);
                 g.attr("transform", `translate(${prevX - bbox.width / 2} ${prevY - bbox.height})`)
-                    .transition().duration(transitionSpeed / 2)
+                    .transition().duration(transitionSpeed)
                     .attr("transform", `translate(${x - bboxNext.width / 2} ${y - bboxNext.height})`)
-                path.attr("d", d).transition().duration(transitionSpeed / 2)
+                path.attr("d", d).transition().duration(transitionSpeed)
                     .attr("d", dNext)
             } else {
                 console.log("REACHING HERE. ANIMATE:", animate)

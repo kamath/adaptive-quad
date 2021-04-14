@@ -24,6 +24,7 @@ window.MathJax = {
     },
     svg: {
         scale: 50, // global scaling factor for all expressions
+        fontCache: 'none'
     }
 };
 

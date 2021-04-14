@@ -102,11 +102,19 @@ const loadSlides = (font) => {
     const plot = (x0, y0, w, h, a, b, f, n, yFin, closePath = false) => {
         const dx = (b - a) / n;
         const yStretch = h / yFin;
-        const pixelStep = w / n;
-        return `M ${x0} ${y0}` + Array(n + 1).fill(1).map((_, i) => {
-            const x = a + dx * i;
-            return `L${x0 + pixelStep * i} ${y0 - yStretch * f(x)}`
-        }).join(" ")
+        const xStretch = w / (b - a)
+        return `M ${x0} ${y0}` + Array(n).fill(1).map((_, i) => {
+            const x1 = a + dx * i;
+            const x2 = a + dx * (i + 1);
+            const xc = a + dx * i + dx / 2;
+            // console.log("X1", x1, "X2", x2, "Xc", xc)
+            const y1 = f(x1);
+            const y2 = f(x2);
+            const yc = f(xc);
+            const xBez = 2 * xc - x1 / 2 - x2 / 2;
+            const yBez = 2 * yc - y1 / 2 - y2 / 2;
+            return `Q ${x0 + xStretch * xBez - xStretch * a},${y0 - yStretch * yBez} ${x0 + xStretch * x2 - xStretch * a},${y0 - yStretch * y2}`;
+        }).join("")
     }
 
     const MRAM = (x0, y0, w, h, a, b, f, n, yFin) => {
@@ -199,16 +207,17 @@ const loadSlides = (font) => {
             const x1 = a + dx * i;
             const x2 = a + dx * (i + 1);
             const xc = a + dx * i + dx / 2;
+            // console.log("X1", x1, "X2", x2, "Xc", xc)
             const y1 = f(x1);
             const y2 = f(x2);
             const yc = f(xc);
             const xBez = 2 * xc - x1 / 2 - x2 / 2;
             const yBez = 2 * yc - y1 / 2 - y2 / 2;
-            return `M ${x0 + xStretch * x1} ${y0} L${x0 + xStretch * x1} ${y0 - yStretch * y1} Q ${x0 + xStretch * xBez},${y0 - yStretch * yBez} ${x0 + xStretch * x2},${y0 - yStretch * y2} L ${x0 + xStretch * x2} ${y0}`;
+            return `M ${x0 + xStretch * x1 - xStretch * a} ${y0} L${x0 + xStretch * x1 - xStretch * a} ${y0 - yStretch * y1} Q ${x0 + xStretch * xBez - xStretch * a},${y0 - yStretch * yBez} ${x0 + xStretch * x2 - xStretch * a},${y0 - yStretch * y2} L ${x0 + xStretch * x2 - xStretch * a} ${y0}`;
         }).join("")
     }
 
-    let i = 0;
+    let i = 13;
 
     // Figure sizes
     figWidth = vizHeight * .7;
@@ -235,41 +244,23 @@ const loadSlides = (font) => {
         cy: vizHeight / 2 + figHeight / 2
     }
 
-    const lineYEqualsX = {
-        svgType: "path",
-        points: plot(width / 2 - figWidth / 2, vizHeight / 2 + figHeight / 2, figWidth, figHeight, 0, 6.28, x => x, 100, 6.28),
-        fill: colors.areaColor,
-        stroke: colors.curveColor,
-        strokeWidth: 3,
-        alpha: 0,
-        strokeAlpha: 1,
-        cx: width / 2 - figWidth / 2,
-        cy: vizHeight / 2
-    };
+    const standardCurve = (halfX, a, b, f, yFin, n = 10) => {
+        return {
+            svgType: "path",
+            points: plot(width / 2 - figWidth / 2, vizHeight / 2 + (halfX ? 0 : figHeight / 2), figWidth, figHeight, a, b, f, n, yFin * (halfX ? 2 : 1)),
+            fill: colors.areaColor,
+            stroke: colors.curveColor,
+            strokeWidth: 3,
+            alpha: 0,
+            strokeAlpha: 1,
+            cx: width / 2 - figWidth / 2,
+            cy: vizHeight / 2
+        }
+    }
 
-    const parabola = {
-        svgType: "path",
-        points: plot(width / 2 - figWidth / 2, vizHeight / 2 + figHeight / 2, figWidth, figHeight, 0, 10, x => Math.pow(x - 5, 2), 100, 25),
-        fill: colors.areaColor,
-        stroke: colors.curveColor,
-        strokeWidth: 3,
-        alpha: 0,
-        strokeAlpha: 1,
-        cx: width / 2 - figWidth / 2,
-        cy: vizHeight / 2
-    };
-
-    const sinCurve = {
-        svgType: "path",
-        points: plot(width / 2 - figWidth / 2, vizHeight / 2, figWidth, figHeight, 0, 6.28, Math.sin, 100, 2),
-        fill: colors.areaColor,
-        stroke: colors.curveColor,
-        strokeWidth: 3,
-        alpha: 0,
-        strokeAlpha: 1,
-        cx: width / 2 - figWidth / 2,
-        cy: vizHeight / 2
-    };
+    const lineYEqualsX = standardCurve(false, 0, 6.26, x => x, 6.28);
+    const parabola = standardCurve(false, 0, 10, x => (x - 5, 2), 25);
+    const sinCurve = standardCurve(true, 0, 6.28, Math.sin, 1)
 
     const mramSVG = (halfX, a, b, n, f, yFin) => [{
         svgType: "path",
@@ -410,8 +401,40 @@ const loadSlides = (font) => {
             sinCurve,
             simpsonSVG(true, 0, 6.28, 8, Math.sin, 1),
             ...mramErr(true, 0, 6.28, 8, Math.sin, 1).map(d => { return {...d, alpha: 0, strokeAlpha: 0 } }),
-            {},
             yAxisFig
+        ],
+        [
+            xAxisFig,
+            yAxisFig,
+            standardCurve(true, 1, 6.28, x => (16 * 3.14 / Math.pow(x, 2)) * Math.sin(4 * 3.14 / x), 40, 30),
+            simpsonSVG(true, 1, 6.28, 8, x => (16 * 3.14 / Math.pow(x, 2)) * Math.sin(4 * 3.14 / x), 40),
+            ...mramErr(true, 1, 6.28, 8, x => (16 * 3.14 / Math.pow(x, 2)) * Math.sin(4 * 3.14 / x), 1).map(d => { return {...d, alpha: 0, strokeAlpha: 0 } }),
+            yAxisFig
+        ],
+        [
+            xAxisFig,
+            yAxisFig,
+            standardCurve(true, 1, 6.28, x => (16 * 3.14 / Math.pow(x, 2)) * Math.sin(4 * 3.14 / x), 40, 100),
+            simpsonSVG(true, 1, 6.28, 16, x => (16 * 3.14 / Math.pow(x, 2)) * Math.sin(4 * 3.14 / x), 40),
+            ...mramErr(true, 1, 6.28, 8, x => (100 / Math.pow(x, 2)) * Math.sin(10 / x), 1).map(d => { return {...d, alpha: 0, strokeAlpha: 0 } }),
+            yAxisFig
+        ],
+        [
+            xAxisFig,
+            yAxisFig,
+            standardCurve(true, 1, 6.28, x => (16 * 3.14 / Math.pow(x, 2)) * Math.sin(4 * 3.14 / x), 40, 100),
+            simpsonSVG(true, 1, 6.28, 16, x => (16 * 3.14 / Math.pow(x, 2)) * Math.sin(4 * 3.14 / x), 40),
+            ...mramErr(true, 1, 6.28, 8, x => (100 / Math.pow(x, 2)) * Math.sin(10 / x), 1).map(d => { return {...d, alpha: 0, strokeAlpha: 0 } }),
+            yAxisFig,
+            {
+                svgType: "path",
+                points: `M ${width / 2 - figWidth / 2} ${vizHeight / 2 + figHeight / 2 + 20} L ${width / 2 - figWidth / 2 + figWidth / 6.28} ${vizHeight / 2 + figHeight / 2 + 20}`,
+                strokeWidth: 3,
+                strokeAlpha: 1,
+                stroke: "255,255,255",
+                cx: width / 2 - figWidth / 2 + figWidth / 3.14,
+
+            },
         ],
     ];
 
@@ -458,6 +481,18 @@ const loadSlides = (font) => {
         ],
         [
             ["plaintext", "Or better yet... parabolas", width / 2, height / 2 + figHeight / 2],
+        ],
+        [
+            ["plaintext", "What about \"wonkier\" curves?", width / 2, height / 2 + figHeight / 2],
+            ["latex", String.raw `\frac{16\pi}{x^2}\sin(\frac{4\pi}{x})`, width / 2, height / 2 - figHeight / 2, 25],
+        ],
+        [
+            ["plaintext", "More intervals, less error", width / 2, height / 2 + figHeight / 2],
+            ["plaintext", "But also more computations", width / 2, height / 2 + figHeight / 2 + 40],
+            ["latex", String.raw `\frac{16\pi}{x^2}\sin(\frac{4\pi}{x})`, width / 2, height / 2 - figHeight / 2, 25, false],
+        ],
+        [
+            ["latex", String.raw `\frac{16\pi}{x^2}\sin(\frac{4\pi}{x})`, width / 2, height / 2 - figHeight / 2, 25, false],
         ]
     ];
 
@@ -498,18 +533,19 @@ const loadSlides = (font) => {
             return
         }
         var el = MathJax.tex2svg(String.raw `${text}`)
-        el = el.querySelector("svg");
-        // el.setAttribute("width", "1ex");
-        // el.style.verticalAlign = "middle";
-        // el.removeAttribute("width")
-        // el.setAttribute("width", size)
+        el = el.querySelector("svg").querySelector("g");
+        console.log("EL", el)
+            // el.setAttribute("width", "1ex");
+            // el.style.verticalAlign = "middle";
+            // el.removeAttribute("width")
+            // el.setAttribute("width", size)
         console.log(MathJax.svgStylesheet())
         const displayText = () => canvas
             .append('g')
-            .attr('transform', `translate(${x} ${y})`)
+            .attr('transform', `translate(${x} ${y}) scale(${size / figHeight})`)
             .append(() => el)
-            .selectAll("path")
-            .attr("class", animate ? "animate" : "")
+            .selectAll("*")
+            .attr("class", "textSVG " + (animate ? "animate" : ""))
         animate ? setTimeout(
             displayText,
             transitionSpeed / 2) : displayText()

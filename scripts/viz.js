@@ -214,7 +214,7 @@ const loadSlides = (font) => {
     figWidth = vizHeight * .7;
     figHeight = vizHeight * .7;
 
-    const transitionSpeed = 1500;
+    const transitionSpeed = 1000;
     let xAxisFig = {
         points: xAxis(width / 2, vizHeight / 2, figWidth, 3),
         fill: colors.axisColor,
@@ -417,8 +417,8 @@ const loadSlides = (font) => {
 
     // Texts to render
     const textSpacer = 20;
-    const h1Size = 65;
-    const h3Size = 45;
+    const h1Size = 55;
+    const h3Size = 35;
     let texts = [
         [
             ["plaintext", "Click anywhere to Start", width / 2, height / 2 - 36, h1Size],
@@ -454,7 +454,7 @@ const loadSlides = (font) => {
             ["plaintext", "Imbalance!", width / 2 - figWidth / 2 + 3 * figWidth / 8 + 30, vizHeight / 2 - 5 * figHeight / 12, , , false, true],
         ],
         [
-            ["plaintext", "A better approach would replace rectangles with trapezoids", width / 2, height / 2 + figHeight / 2],
+            ["plaintext", "Replace rectangles with trapezoids", width / 2, height / 2 + figHeight / 2],
         ],
         [
             ["plaintext", "Or better yet... parabolas", width / 2, height / 2 + figHeight / 2],
@@ -462,7 +462,7 @@ const loadSlides = (font) => {
     ];
 
     // Render the text and animate if necessary
-    const renderText = (i, ind, textType, text, x, y, size = Math.min(figHeight / 5, 50), animate = true, centerAlign = true, leftAlign = false, rightAlign = false) => {
+    const renderText = (i, ind, textType, text, x, y, size = Math.min(figHeight / 5, 40), animate = true, centerAlign = true, leftAlign = false, rightAlign = false) => {
         console.log("GOT TEXT", text)
         if (textType === "plaintext") {
             const g = canvas.append("g");
@@ -470,7 +470,7 @@ const loadSlides = (font) => {
             path.attr("class", "textSVG")
             if (i > 0 && ind < texts[i - 1].length && animate) {
                 const [prevTextType, prevText, prevX, prevY, prevSize = 72, prevAnimate = false] = texts[i - 1][ind]
-                const prevPath = font.getPath(prevText, 0, prevSize, prevSize).commands;
+                const prevPath = font.getPath(prevText, 0, Math.min(prevSize, size), Math.min(size, prevSize)).commands;
                 const [d, bbox] = toPathData(prevPath, 5)
 
                 path.attr("d", d)
@@ -480,7 +480,7 @@ const loadSlides = (font) => {
                 const curPath = font.getPath(text, 0, size, size).commands;
                 const [dNext, bboxNext] = toPathData(curPath, 0, size, size);
                 g.attr("transform", `translate(${prevX - bbox.width / 2} ${prevY - bbox.height})`)
-                    .transition().duration(transitionSpeed)
+                    .transition().duration(transitionSpeed / 2)
                     .attr("transform", `translate(${x - bboxNext.width / 2} ${y - bboxNext.height})`)
                 path.attr("d", d).transition().duration(transitionSpeed / 2)
                     .attr("d", dNext)

@@ -25,16 +25,16 @@ polygon {
 }
 
 .animate {
-    stroke-dasharray: 1000;
-    stroke-dashoffset: 1000;
+    stroke-dasharray: 100;
+    stroke-dashoffset: 100;
     /* animation: dash 1s linear forwards; */
     animation: dash ease 1;
     -webkit-animation: dash ease 1;
     animation-fill-mode: forwards;
     -webkit-animation-fill-mode: forwards;
-    animation-duration: 3s;
+    animation-duration: 10s;
     -webkit-animation-duration: 1s;
-    stroke-width: 15px;
+    stroke-width: 3px;
 }
 
 .textSVG {

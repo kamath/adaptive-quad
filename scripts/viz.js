@@ -217,7 +217,7 @@ const loadSlides = (font) => {
         }).join("")
     }
 
-    let i = 13;
+    let i = 0;
 
     // Figure sizes
     figWidth = vizHeight * .7;

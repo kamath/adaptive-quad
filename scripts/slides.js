@@ -21,7 +21,7 @@ let slides = [
         },
         {
             svgType: "path",
-            points: plot(xLeft, yBottom, figWidth, figHeight, a, b, x => x, 14.5),
+            points: plot(xLeft, yBottom, figWidth, figHeight, a, b, x => x, b),
             alpha: 0,
             fill: colors.transparent,
             stroke: colors.curveColor,
@@ -172,4 +172,5 @@ let slides = [
     ]
 ]
 
-let skipSlides = new Set([...Array(6).fill(1).map((d, i) => i + 2), ...Array(19).fill(1).map((d, i) => i + 9)])
+// let skipSlides = new Set([...Array(6).fill(1).map((d, i) => i + 2), ...Array(19).fill(1).map((d, i) => i + 9)])
+let skipSlides = new Set(Array(slides.length).fill(1).map((x, i) => i))

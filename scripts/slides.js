@@ -19,6 +19,13 @@ let slides = [
             cx: baseWidth / 2, 
             cy: baseHeight / 2, 
             size: h1Size
+        },
+        {
+            svgType: "plaintext",
+            text: "(looks best on a 15\" screen)", 
+            cx: baseWidth / 2, 
+            cy: baseHeight / 2 + 60, 
+            size: h1Size * .5
         }
     ],
     [

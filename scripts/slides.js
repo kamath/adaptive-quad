@@ -1,47 +1,176 @@
-// // Functions to render a given shape with a given angle
-// const topLeft = (x, y, w, h) => `${x},${y} ${x+w},${y} ${x+w},${y} ${x},${y+h}`
-// const topRight = (x, y, w, h) => `${x},${y} ${x-w},${y} ${x-w},${y} ${x},${y+h}`
-// const bottomLeft = (x, y, w, h) => `${x},${y} ${x},${y-h} ${x},${y-h} ${x+w},${y}`
-// const bottomRight = (x, y, w, h) => `${x},${y} ${x-w},${y} ${x-w},${y} ${x},${y-h}`
-// const square = (x, y, w, h) => `${x - w/2},${y-h/2} ${x+w/2},${y-h/2} ${x+w/2},${y+h/2} ${x-w/2},${y+h/2}`
-// const yAxis = (x, y, h, strokeWidth) => `${x-strokeWidth/2},${y + h/2} ${x-strokeWidth/2},${y - h/2} ${x+strokeWidth/2},${y - h/2} ${x+strokeWidth/2},${y + h/2}`
-// const xAxis = (x, y, w, strokeWidth) => `${x-w/2},${y + strokeWidth/2} ${x-w/2},${y - strokeWidth/2} ${x+w/2},${y - strokeWidth/2} ${x+w/2},${y + strokeWidth/2}`
+const f = x => 16 * Math.PI / Math.pow((x + 1), 2) * Math.sin(4 * Math.PI / (x + 1)) //Math.sin(x) / x
+a = 0
+b = 5// * Math.PI
+yFin = 80
 
-// const plot = (x, y, w, h, a, b, f, step) => {
-//     const steps = Math.ceil((b - a) / step);
-//     figStep = h * w / (a - b) // Resize to current width
-//     let points = [];
-//     for (let i = 0; i < steps; i++) {
-//         points.push(`${x + step*i},${y+50}`)
-//     }
-//     return points.join(' ')
-// }
+console.log("ADAPTIVE", adaptive(simpsonsRule, f, a, b, .1, true))//.filter(x => x[x.length - 1] === "FINAL"))
 
-// const dirs = [topLeft, square, topRight, bottomLeft, bottomRight]
+let slides = [
+    [
+        {
+            points: xAxis(xc, yBottom, figWidth, 1.5),
+            fill: colors.axisColor,
+            cx: xLeft,
+            cy: yBottom,
+        },
+        {
+            points: yAxis(xLeft, yc, figHeight, 1.5),
+            fill: colors.axisColor,
+            cx: xLeft,
+            cy: yBottom,
+        },
+        {
+            svgType: "path",
+            points: plot(xLeft, yBottom, figWidth, figHeight, a, b, x => x, b),
+            alpha: 0,
+            fill: colors.transparent,
+            stroke: colors.curveColor,
+            strokeWidth: 3,
+            strokeAlpha: 1,
+            delay: transitionSpeed
+        }
+    ],
+    [
+        {
+            points: xAxis(xc, yc, figWidth, 1.5),
+            fill: colors.axisColor,
+            cx: xLeft,
+            cy: yc,
+        },
+        {
+            points: yAxis(xLeft, yc, figHeight, 1.5),
+            fill: colors.axisColor,
+            cx: xLeft,
+            cy: yc,
+        },
+        {
+            svgType: "path",
+            points: plot(xLeft, yc, figWidth, figHeight, a, b, f, yFin),
+            alpha: 0,
+            fill: colors.transparent,
+            stroke: colors.curveColor,
+            strokeWidth: 3,
+            strokeAlpha: 1,
+            // delay: transitionSpeed
+        }
+    ],
+    ...Array(6).fill(1).map((d, i) => [
+        {
+            "keep": true, // x axis
+        },
+        {
+            "keep": true, // y axis
+        },
+        {
+            "keep": true // plot
+        },
+        {
+            svgType: "path",
+            points: simpsonCircles(xLeft, yc, figWidth / Math.pow(2, i), figHeight, a, b / Math.pow(2, i), f, yFin),
+            alpha: 0.5,
+            fill: colors.areaColor,
+            stroke: colors.axisColor,
+            strokeWidth: 3,
+            strokeAlpha: 1,
+            delay: 0,
+            skipAfter: transitionSpeed
+        }
+    ]),
+    [
+        {
+            "keep": true, // x axis
+        },
+        {
+            "keep": true, // y axis
+        },
+        {
+            "keep": true, // plot
+            alpha: 0
+        },
+        {
+            "keep": true, // parabolas
+            alpha: 0,
+            strokeAlpha: 0
+        },
+        {
+            svgType: "path",
+            points: simpsons(xLeft, yc, figWidth, figHeight, a, b, f, Math.pow(2, 5), yFin),
+            fill: colors.areaColor,
+            stroke: colors.white,
+            strokeWidth: 3,
+            alpha: .5,
+            strokeAlpha: 1,
+        }
+    ],
+    ...Array(19).fill(1).map((d, i) => [
+        {
+            "keep": true,
+        },
+        {
+            "keep": true,
+        },
+        {
+            "keep": true
+        },
+        {
+            svgType: "path",
+            points: simpsonCircles(xLeft, yc, figWidth, figHeight, a, b, f, yFin, i + 1, .1),
+            fill: colors.areaColor,
+            stroke: colors.white,
+            strokeWidth: 3,
+            alpha: 0,
+            strokeAlpha: 1,
+            cx: xRight,
+            animateFromPrev: i != 0
+        },
+        {
+            svgType: "path",
+            points: adaptiveSimpsons(xLeft, yc, figWidth, figHeight, a, b, f, yFin, i, .1),
+            fill: colors.areaColor,
+            stroke: colors.white,
+            strokeWidth: 3,
+            alpha: .5,
+            strokeAlpha: 1,
+            animate: i == 0,
+            animateFromPrev: false
+        }
+    ]),
+    [
+        {
+            "keep": true,
+        },
+        {
+            "keep": true,
+        },
+        {
+            "keep": true
+        },
+        {
+            "keep": true,
+            alpha: 0,
+            strokeAlpha: 0
+        },
+        {
+            svgType: "path",
+            points: adaptiveSimpsons(xLeft, yc, figWidth, figHeight, a, b, f, yFin, 19, .1),
+            fill: colors.areaColor,
+            stroke: colors.white,
+            strokeWidth: 3,
+            alpha: .5,
+            strokeAlpha: .5,
+            animateFromPrev: false
+        },
+        // {
+        //     svgType: "path",
+        //     points: simpsons(xLeft, yc, figWidth, figHeight, a, b, f, 7, yFin),
+        //     fill: colors.area,
+        //     stroke: colors.red,
+        //     strokeWidth: 3,
+        //     alpha: .5,
+        //     strokeAlpha: .5,
+        // }
+    ]
+]
 
-// let i = 0;
-
-// // Figure sizes
-// figWidth = vizHeight * .7
-// figHeight = vizHeight * .7
-
-// const transitionSpeed = 1500
-
-// // Shapes to render
-// let slides = [
-//     [
-//         [yAxis(width / 2 - figWidth / 2, vizHeight / 2, figHeight, 3), "#DAEFB3", width / 2 - figWidth / 2, vizHeight / 2],
-//         [xAxis(width / 2, vizHeight / 2, figWidth, 3), "#DAEFB3", width / 2 - figWidth / 2, vizHeight / 2],
-//     ],
-//     [
-//         [yAxis(width / 2 - figWidth / 2, vizHeight / 2, figHeight, 3), "#DAEFB3", width / 2 - figWidth / 2, vizHeight / 2],
-//         [xAxis(width / 2, vizHeight / 2, figWidth, 3), "#DAEFB3", width / 2 - figWidth / 2, vizHeight / 2],
-//         [plot(width / 2 - figWidth / 2, vizHeight / 2, figWidth, figHeight, )]
-//     ],
-// ];
-
-// // Texts to render
-// const textSpacer = 20
-// let texts = [
-
-// ];
+// let skipSlides = new Set([...Array(6).fill(1).map((d, i) => i + 2), ...Array(19).fill(1).map((d, i) => i + 9)])
+let skipSlides = new Set(Array(slides.length).fill(1).map((x, i) => i))

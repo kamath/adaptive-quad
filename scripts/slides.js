@@ -40,24 +40,26 @@ let slides = [
     [
         {autoSkip: transitionSpeed},
         {
-            keep: true,
+            svgType: "plaintext",
             text: "How do computers find the area under a curve?", 
+            cx: baseWidth / 2,
             cy: baseHeight / 2 + figHeight / 2,
-            size: Math.min(figHeight / 5, 40)
+            size: Math.min(figHeight / 5, 40),
+            animate: true
         },
         {
             svgType: "polygon",
             points: xAxis(xc, yBottom - textHeight, figWidth, 1.5),
             fill: colors.axisColor,
             cx: xLeft,
-            cy: yBottom,
+            cy: yBottom - textHeight,
         },
         {
             svgType: "polygon",
             points: yAxis(xLeft, yc - textHeight, figHeight, 1.5),
             fill: colors.axisColor,
             cx: xLeft,
-            cy: yBottom,
+            cy: yBottom - textHeight,
         },
         {
             svgType: "path",
@@ -67,7 +69,7 @@ let slides = [
             stroke: colors.curveColor,
             strokeWidth: 3,
             strokeAlpha: 1,
-            // delay: transitionSpeed
+            delay: transitionSpeed / 2
         }
     ],
     [
@@ -327,7 +329,7 @@ let slides = [
     [
         {
             keep: true,
-            text: `We end up with just 10 intervals and an error of ${err}`,
+            text: `We end up with just 10 intervals`,
             animate: true
         },
         {
@@ -354,5 +356,298 @@ let slides = [
             strokeAlpha: .5,
             animateFromPrev: false
         }
-    ]
+    ],
+    [
+        // {autoSkip: transitionSpeed},
+        {
+            svgType: "plaintext",
+            text: "Mathematical Intuition:", 
+            cx: baseWidth / 2, 
+            cy: textHeight, 
+            size: h1Size,
+            animateFromPrev: false,
+        },
+        {
+            svgType: "latex",
+            text: "\\text{For interval }[a, b]\\text{ let }h = \\frac{b-a}{2}\\; \\text{(step)},\\quad c=\\frac{b+a}{2} \\; \\text{(midpoint)}", 
+            cx: 50, 
+            cy: textHeight + h1Size, 
+            size: h1Size * .5
+        }
+    ],
+    [
+        // {autoSkip: transitionSpeed},
+        {
+            keep: true,
+            animate: false
+        },
+        {
+            keep: true,
+            animate: false
+        },
+        {
+            svgType: "latex",
+            text: "\\text{Simpson's Rule: } S_1[a, b] = \\frac{h}{3}[f(a) + 4f(c) + f(b)]", 
+            cx: 50, 
+            cy: textHeight + h1Size * 3, 
+            size: h1Size * .5,
+            leftAlign: true,
+            centerAlign: false
+        }
+    ],
+    [
+        // {autoSkip: transitionSpeed},
+        {
+            keep: true,
+            animate: false
+        },
+        {
+            keep: true,
+            animate: false
+        },
+        {
+            keep: true,
+            animate: false
+        },
+        {
+            svgType: "latex",
+            text: "\\text{Simpson's Rule: } S_1[a, b] = \\frac{h}{3}[f(a) + 4f(c) + f(b)] \\quad \\text{Error: } E_1[a, b] =  \\frac{-1}{90}h^5f^{(4)}(\\xi)\\quad\\xi\\in[a, b]", 
+            cx: 50, 
+            cy: textHeight + h1Size * 3, 
+            size: h1Size * .5,
+            leftAlign: true,
+            centerAlign: false
+        }
+    ],
+    [
+        // {autoSkip: transitionSpeed},
+        {
+            keep: true,
+            animate: false
+        },
+        {
+            keep: true,
+            animate: false
+        },
+        {
+            keep: true,
+            animate: false
+        },
+        {
+            keep: true,
+            animate: false
+        },
+        {
+            svgType: "latex",
+            text: "\\int_a^b{f\\,dx} = S_1[a, b] + E_1[a, b]", 
+            cx: 50, 
+            cy: textHeight + h1Size * 5, 
+            size: h1Size * .5,
+            leftAlign: true,
+            centerAlign: false
+        }
+    ],
+    [
+        // {autoSkip: transitionSpeed},
+        {
+            keep: true,
+            animate: false
+        },
+        {
+            keep: true,
+            animate: false
+        },
+        {
+            keep: true,
+            animate: false
+        },
+        {
+            keep: true,
+            animate: false
+        },
+        {
+            keep: true,
+            animate: false
+        },
+        {
+            svgType: "latex",
+            text: "\\int_a^b{f\\,dx} = S_1[a, b] + E_1[a, b] = \\int_a^c{f\\,dx} + \\int_c^b{f\\,dx} = S_1[a, c] + E_1[a, c] + S_1[c, b] + E_1[c, b] ", 
+            cx: 50, 
+            cy: textHeight + h1Size * 5, 
+            size: h1Size * .5,
+            leftAlign: true,
+            centerAlign: false
+        }
+    ],
+    [
+        // {autoSkip: transitionSpeed},
+        {
+            keep: true,
+            animate: false
+        },
+        {
+            keep: true,
+            animate: false
+        },
+        {
+            keep: true,
+            animate: false
+        },
+        {
+            keep: true,
+            animate: false
+        },
+        {
+            keep: true,
+            animate: false
+        },
+        {
+            keep: true,
+            animate: false
+        },
+        {
+            svgType: "latex",
+            text: "\\text{Let } S_2[a, b] = S_1[a, c] + S_1[c, b]; \\quad E_2[a, b] = E_1[a, c] + E_1[c, b]", 
+            cx: 50, 
+            cy: textHeight + h1Size * 7, 
+            size: h1Size * .5,
+            leftAlign: true,
+            centerAlign: false
+        }
+    ],
+    [
+        // {autoSkip: transitionSpeed},
+        {
+            keep: true,
+            animate: false
+        },
+        {
+            keep: true,
+            animate: false
+        },
+        {
+            keep: true,
+            animate: false
+        },
+        {
+            keep: true,
+            animate: false
+        },
+        {
+            keep: true,
+            animate: false
+        },
+        {
+            keep: true,
+            animate: false
+        },
+        {
+            keep: true,
+            animate: false
+        },
+        {
+            svgType: "latex",
+            text: "E_2[a, b] = \\frac{-1}{90}(\\frac{h}{2})^5(f^{(4)}(\\xi_1) + f^{(4)}(\\xi_2))", 
+            cx: 50, 
+            cy: textHeight + h1Size * 8, 
+            size: h1Size * .5,
+            leftAlign: true,
+            centerAlign: false
+        }
+    ],
+    [
+        {
+            keep: true,
+            animate: false
+        },
+        {
+            keep: true,
+            animate: false
+        },
+        {
+            keep: true,
+            animate: false
+        },
+        {
+            keep: true,
+            animate: false
+        },
+        {
+            keep: true,
+            animate: false
+        },
+        {
+            keep: true,
+            animate: false
+        },
+        {
+            keep: true,
+            animate: false
+        },
+        {
+            keep: true,
+            animate: false
+        },
+        {
+            svgType: "latex",
+            text: "\\text{Assuming }f^{(4)} \\text{ doesn't change much, } E_2[a, b] \\approx 2E_1[a, c] = \\frac{-1}{90}(\\frac{h}{2})^5(2f^{(4)}(\\xi_1)) = \\frac{1}{2^4}E_1[a, b]", 
+            cx: 50, 
+            cy: textHeight + h1Size * 10, 
+            size: h1Size * .5,
+            leftAlign: true,
+            centerAlign: false
+        }
+    ],
+    [
+        {
+            svgType: "plaintext",
+            text: "Putting it together:", 
+            cx: baseWidth / 2, 
+            cy: textHeight, 
+            size: h1Size,
+        },
+        {
+            svgType: "latex",
+            text: "\\int_a^b{f\\,dx} = S_1 + E_1 = S_2 + E_2  = S_2 + \\frac{1}{2^4}E_1", 
+            cx: 50, 
+            cy: textHeight + h1Size, 
+            size: h1Size * .5
+        }
+    ],
+    [
+        {keep: true, animate: false},
+        {keep: true, animate: false},
+        {
+            svgType: "latex",
+            text: "S_2[a, b] - S_1[a, b] = E_1 - E_2 = 2^4E_2 - E_2 = 15E_2", 
+            cx: 50, 
+            cy: textHeight + h1Size * 3, 
+            size: h1Size * .5
+        }
+    ],
+    [
+        {keep: true, animate: false},
+        {keep: true, animate: false},
+        {keep: true, animate: false},
+        {
+            svgType: "latex",
+            text: "\\rightarrow E_2 = \\frac{S_2-S_1}{15} \\leq \\epsilon, \\quad \\epsilon\\text{ being the max error tolerance}", 
+            cx: 50, 
+            cy: textHeight + h1Size * 4, 
+            size: h1Size * .5
+        }
+    ],
+    [
+        {keep: true, animate: false},
+        {keep: true, animate: false},
+        {keep: true, animate: false},
+        {keep: true, animate: false},
+        {
+            svgType: "latex",
+            text: "\\int_a^b f dx = S_2 + E_2 = \\fbox{$S_2 + \\frac{S_2-S_1}{15}$}", 
+            cx: 50, 
+            cy: textHeight + h1Size * 6, 
+            size: h1Size * .5
+        }
+    ],
 ]

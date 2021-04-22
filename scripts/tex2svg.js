@@ -1,6 +1,8 @@
 // MathJax configuration (converts LaTeX to SVG)
 
 window.MathJax = {
+    loader: {load: ['[tex]/ams']},
+    tex: {packages: {'[+]': ['ams']}},
     tex: {
         inlineMath: [
             ['$', '$'],
@@ -12,7 +14,7 @@ window.MathJax = {
             console.log('MathJax is loaded, but not yet initialized');
             MathJax.startup.defaultReady();
             // loadMotivation();
-            opentype.load('fonts/Roboto-Regular.ttf', function(err, font) {
+            opentype.load('fonts/cmunrm.ttf', function(err, font) {
                 if (err) {
                     alert('Font could not be loaded: ' + err);
                 } else {
@@ -24,7 +26,8 @@ window.MathJax = {
     },
     svg: {
         scale: 50, // global scaling factor for all expressions
-        fontCache: 'none'
+        fontCache: 'none',
+        exFactor: 1
     }
 };
 

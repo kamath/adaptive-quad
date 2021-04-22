@@ -24,7 +24,7 @@ polygon {
     shape-rendering: crispEdges
 }
 
-.animate {
+polygon.animate, path.animate {
     stroke-dasharray: 100;
     stroke-dashoffset: 100;
     /* animation: dash 1s linear forwards; */
@@ -103,4 +103,13 @@ li *:empty {
 mjx-container {
     display: absolute !important;
     top: -40px ! important;
+}
+
+text {
+    font-size: 1000;
+}
+
+rect.textSVG {
+    fill: transparent !important;
+    stroke-width: 45px;
 }

@@ -44,6 +44,7 @@ const loadSlides = (font) => {
             text, cx: x, cy: y, 
             size = Math.min(figHeight / 5, 40), 
             animate = true, 
+            animateFromPrev = false,
             delay = 0,
             centerAlign = true, leftAlign = false, rightAlign = false} = textJson
         console.log("GOT TEXT", text)
@@ -51,8 +52,8 @@ const loadSlides = (font) => {
             const g = canvas.append("g");
             const path = g.append("path");
             path.attr("class", "textSVG")
-            if (i > 0 && ind < slides[i - 1].length && animate) {
-                const {svgType: prevTextType, text: prevText, cx: prevX, cy: prevY, size: prevSize = 72, aniamte: prevAnimate = false} = slides[i - 1][ind]
+            if (i > 0 && ind < slides[i - 1].length && animate && slides[i-1][ind].svgType === textType && animateFromPrev) {
+                const {svgType: prevTextType, text: prevText, cx: prevX, cy: prevY, size: prevSize = 72, animate: prevAnimate = false} = slides[i - 1][ind]
                 const prevPath = font.getPath(prevText, 0, Math.min(prevSize, size), Math.min(size, prevSize)).commands;
                 const [d, bbox] = toPathData(prevPath, 5)
 
@@ -82,22 +83,35 @@ const loadSlides = (font) => {
             return
         }
         var el = MathJax.tex2svg(String.raw `${text}`)
-        el = el.querySelector("svg").querySelector("g");
+        el = el.querySelector("svg")
+        console.log("EL SVG", el)
+        // el = el.querySelector("g");
         console.log("EL", el)
             // el.setAttribute("width", "1ex");
             // el.style.verticalAlign = "middle";
             // el.removeAttribute("width")
             // el.setAttribute("width", size)
+        // console.log("HEIGHT", parseFloat(el.getAttribute("height").replace("ex", "")) * size)
+        // el.removeAttribute("width")
         console.log(MathJax.svgStylesheet())
-        const displayText = () => canvas
+        displayText = canvas
             .append('g')
-            .attr('transform', `translate(${x} ${y}) scale(${size / figHeight})`)
+        
+        const exHeight = parseFloat(el.getAttribute("height").replace("ex", ""))
+        const exWidth = parseFloat(el.getAttribute("width").replace("ex", ""))
+
+        displayText.attr('transform', `translate(${x} ${y}) scale(1.5)`)
             .append(() => el)
             .selectAll("*")
-            .attr("class", "textSVG " + (animate ? "animate" : ""))
-        animate ? setTimeout(
-            displayText,
-            transitionSpeed / 2) : displayText()
+            .attr("class", `textSVG latex_${i}_${ind} ` + (animate ? "animate" : ""))
+        
+        bbox = displayText.node().getBBox()
+        console.log("BBOX", bbox)
+
+        // if(centerAlign) displayText.select(`g`).select('g').attr(`transform`, `translate(${x + bbox.width / 2} ${y})`)
+        // animate ? setTimeout(
+        //     displayText,
+        //     transitionSpeed / 2) : displayText()
     }
 
     // Render the slides

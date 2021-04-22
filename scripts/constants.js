@@ -31,7 +31,7 @@ const vizHeight = baseHeight - margin.top - margin.bottom;
 // Speed of animations
 const transitionSpeed = 1000;
 
-let i = 0;
+let i = 0 // 45;
 
 // Figure sizes
 const figWidth = vizHeight * .6;

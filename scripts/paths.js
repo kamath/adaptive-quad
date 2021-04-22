@@ -65,7 +65,7 @@ const simpsonCircles = (x0, y0, w, h, a, b, f, yFin, adaptiveI=null, tol=.01) =>
     const xBez = 2 * xMid - x1 / 2 - x2 / 2;
     const yBez = 2 * yMid - y1 / 2 - y2 / 2;
     return circle(x0 + xStretch * x1, y0 - (yStretch * f(x1)), 7.5) + ' ' + 
-        // circle(x0 + w/2, y0 - (yStretch * f((a + b) / 2)), 7.5) +  ' ' + 
+        circle(x0 + xStretch * (x2 + x1) / 2, y0 - (yStretch * f((x2 + x1) / 2)), 7.5) +  ' ' + 
         circle(x0 + xStretch * x2, y0 - (yStretch * f(x2)), 7.5) + 
         `M ${x0 + xStretch * x1} ${y0} L ${x0 + xStretch * x1} ${y0 - (yStretch * f(x1))} Q ${x0 + xStretch * xBez - xStretch * a},${y0 - yStretch * yBez} ${x0 + xStretch * x2 - xStretch * a},${y0 - yStretch * y2}` +
         `L ${x0 + xStretch * x2} ${y0} L ${x0 + xStretch * x1} ${y0}`
